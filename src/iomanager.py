@@ -24,10 +24,12 @@ class Experiment:
         if len(devices) != 2:
             raise Exception("Should have 2 devices but we have these:{}".format(devices))
 
+        print(devices)
+
         # Assert backend
         # TODO: check backend
 
-        time.sleep(2) # wait a little bit for usb connection
+        time.sleep(2)  # wait a little bit for usb connection
         self.spectrometers = []
         for device in devices:
             self.spectrometers.append(sb.Spectrometer(device=device))
@@ -43,7 +45,7 @@ class Experiment:
             #  The minimum integration time is the shortest integration time the device supports
             #  and is dependent on how fast the detector can read out all of the pixel information.
             #  Integration time should not be confused with data transfer speed.
-            spectrometer.integration_time_micros(12000)
+            spectrometer.integration_time_micros(10000)
 
 
             #  Available Trigger Modes
@@ -70,9 +72,8 @@ class Experiment:
         return np.array(spectrometer.intensities(correct_dark_counts=True, correct_nonlinearity=True))
 
     def get_intensities(self):
-        # TODO: need to test this function
         pool = ThreadPool(2)
-        self.intensities = pool.map(self._intensity, self.spectrometers)
+        self.intensities = np.array(pool.map(self._intensity, self.spectrometers))
         self.intensities = self.intensities.flatten()
         return self.intensities
 
@@ -86,15 +87,19 @@ class Experiment:
                              'intensities': self.intensities})
 
 # ========================  IOMANAGER  ========================
-# with Experiment() as experiment:
-#     intensities = experiment.get_intensities()
-#     wavelengths = experiment.get_wavelengths()
-#
-#     df = experiment.to_dataframe()
-#
-#     plt.plot(wavelengths, intensities)
-#     plt.show()
-#     # results.to_csv('data_toprak1_{}.csv'.format(time.time()))
+with Experiment() as experiment:
+    intensities = experiment.get_intensities()
+    wavelengths = experiment.get_wavelengths()
+
+    df = experiment.to_dataframe()
+
+    plt.plot(wavelengths, intensities)
+    plt.show()
+
+    results = pd.DataFrame()
+    results['wavelengths'] = wavelengths
+    results['intensities'] = intensities
+    results.to_csv('../input/gubre/gubre_{}.csv'.format(time.time()))
 # ========================  IOMANAGER  ========================
 
 
