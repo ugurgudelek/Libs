@@ -5,11 +5,14 @@ from scipy import signal
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-# TODO S:
-# fix find peak interval (nm) and average them but look for std in peaks because outliers can be found.
+import configparser
 
-# fix elements map
-# fix database read
+
+# TODO S:
+# DONE:fix find peak interval (nm) and average them but look for std in peaks because outliers can be found.
+
+# DONE:fix elements map
+# DONE:fix database read
 
 # make gui to read sample from spectrometer.
 # fix database issues
@@ -24,23 +27,9 @@ from collections import defaultdict
 # logos of companies
 
 # maybe developer mode on/off
-# config txt for nm interval, paths, dev on/off
 
 
-
-
-# CSV_DIR = '../input/toprak1/'
-CSV_DIR = '../input/gubre'
-DB_PATH = '../input/element_database.xlsx'
-PEAK_INTERVAL = 0.5  # nm
-MATCH_INTERVAL = 0.5  # nm
-ELEMENTS_MAP = {'N': ['NI', 'NII', 'NIII', 'NIV', 'NV', 'NII-'],
-                'C': ['CI', 'CII', 'CIII', 'CIV', 'CV'],
-                'P': ['PI', 'PII', 'PIII', 'PIV', 'PV'],
-                'K': ['KI', 'KII', 'KII', 'KIII', 'KXI'],
-                'Fe': ['Fe','FeI', 'FeII'],
-                'Al': ['Al', 'AlI', 'AlII'],
-                'Cu': ['Cu','CuI']}
+# DONE: config txt for nm interval, paths, dev on/off
 
 
 class Database:
@@ -48,127 +37,197 @@ class Database:
 
     """
 
-    def __init__(self, db_path):
+    def __init__(self, config):
 
-        self.database = self.open_db(db_path)
-        self.database = self.filter_db()
-        self.database = self.sort_db()
+        self.element_mapping = config.element_mapping
+        self.db_dir = config.db_dir
 
-    def open_db(self, database_path):
+        self.database = self._open_db()
+        self._filter_db()
+        self.database.sort_values(by=['name', 'nm'], inplace=True)
+
+    def _open_db(self):
         """
         Reads excel file.
         Returns dictonary which has keys as elements and values as wavelength
         """
 
-        database = pd.read_excel(database_path, header=None)
+        database = pd.DataFrame()
 
-        # TODO: refactor method
-        database_al = pd.read_csv('../input/database/database_al.csv')
-        database_cu = pd.read_csv('../input/database/database_cu.csv')
-        database_fe = pd.read_csv('../input/database/database_fe.csv')
+        for filename in os.listdir(self.db_dir):
+            if 'csv' in filename:
+                database = database.append(pd.read_csv(os.path.join(self.db_dir, filename), skipinitialspace=True))
 
-        database_groupdict = database.groupby(by=0).groups
+        return database
 
+    def _filter_db(self):
+        """
+        Filter database with respect to database mapping
+        :return:
+        """
 
-        database_dict = dict()
-        for (element_name, idxs) in database_groupdict.items():
-            rows = database.iloc[idxs.values, 1:].values.flatten()  # fetch multiple lines at once
-            rows = rows[~np.isnan(rows)]  # remove nan values
-            database_dict[element_name] = rows
+        # reverse the mapping
+        inverse_db = {}
+        for (_from, _tos) in self.element_mapping.items():
+            inverse_db.update({_to: _from for _to in _tos})
 
-        database_dict['Al'] = database_al['nm'].values
-        database_dict['Cu'] = database_cu['nm'].values
-        database_dict['Fe'] = database_fe['nm'].values
-
-        return database_dict
-
-    def filter_db(self):
-        # TODO: refactor this function
-        filtered = defaultdict(lambda: np.array([]))
-        for (element, other_versions) in ELEMENTS_MAP.items():
-            for other_version in other_versions:
-                filtered[element] = np.append(filtered[element], self.database[other_version])
-
-        return filtered
+        self.database['name'] = self.database['name'].map(inverse_db)
 
     def search(self, value, threshold):
         """
-        Searchs for only one value in entire database
+        Searchs for only one value within the range of threshold in entire database
         :param value:
         :param threshold:
-        :return: (defaultdict(list)) matches:
+        :return: (pd.DataFrame) matches: values +- threshold
         """
-        matches = defaultdict(list)
-        for (element, wavelengths) in self.database.items():
-            for wavelength in wavelengths:
-                if wavelength - threshold < value < wavelength + threshold:
-                    matches[element].append(wavelength)
 
-        return matches
+        return self.database.loc[((self.database['nm'] - threshold) < value) &
+                                 (value < (self.database['nm'] + threshold))]
 
-    def sort_db(self):
-        database = dict()
-        for (element, wavelengths) in self.database.items():
-            database[element] = np.sort(wavelengths)
+        # matches = defaultdict(list)
+        # for (element, wavelengths) in self.database.items():
+        #     for wavelength in wavelengths:
+        #         if wavelength - threshold < value < wavelength + threshold:
+        #             matches[element].append(wavelength)
+        #
+        # return matches
 
-        return database
+
+class Sample:
+    """
+
+    """
+
+
+    @classmethod
+    def from_file(cls, path, peak_interval):
+        cls.sample = cls.read_sample(path)
+        cls.name = path.split('/')[-2]  # e.g toprak1
+        cls.peak_interval = peak_interval
+        cls.is_valid = False
+
+
+    @classmethod
+    def from_device(cls, spectrometer, name, peak_interval):
+        cls.sample = spectrometer.io_to_dataframe()
+        cls.name = name
+        cls.peak_interval = peak_interval
+        cls.is_valid = False
+
+    @classmethod
+    def from_array(cls, name, wavelengths, intensities, peak_interval, is_valid=True):
+        cls.name = name
+        cls.sample = pd.DataFrame()
+        cls.sample['wavelengths'] = wavelengths
+        cls.sample['intensities'] = intensities
+        cls.peaks = cls.find_peaks(cls.sample, peak_interval)
+        cls.is_valid = is_valid
+
+        return cls
+
+    def peaks_mean(self):
+        return self.peaks['intensities'].values.mean()
+
+    @classmethod
+    def read_sample(cls, sample_path):
+        return pd.read_csv(sample_path, index_col=0)
+
+    @classmethod
+    def find_peaks(cls, sample, peak_interval):
+        """
+
+        :param width: width in nm
+        :return: (pd.DataFrame) peaks
+        """
+        wavelengths_range = sample['wavelengths'].max() - sample['wavelengths'].min()
+        sampling_interval = wavelengths_range / sample['wavelengths'].shape[0]
+
+        peak_ixs = signal.argrelmax(sample['intensities'].values, order=int(peak_interval / sampling_interval))[0]
+        peak_intensities = sample.loc[peak_ixs, 'intensities']
+        peak_wavelengths = sample.loc[peak_ixs, 'wavelengths']
+
+        return pd.DataFrame({'ixs': peak_ixs,
+                             'wavelengths': peak_wavelengths.values,
+                             'intensities': peak_intensities.values},
+                            index=range(peak_ixs.shape[0]))
+
 
 class Analyzer:
     """
 
     """
 
-    def __init__(self, csv_dir):
+    def __init__(self, config, inner_dir, database):
 
-        filenames = os.listdir(csv_dir)
+        self.sample_dir = config.sample_dir
+        self.inner_dir = inner_dir
+        self.peak_interval = config.peak_interval
+        self.match_interval = config.match_interval
+        self.outlier_interval = config.outlier_interval
 
-        intensities = []
-        wavelengths = None
+        self.database = database
 
-        for filename in filenames:
-            if filename.split('.')[-1] == 'csv':
-                df = pd.read_csv(os.path.join(csv_dir, filename))
-                intensities.append(df['intensities'].values)
-                wavelengths = df['wavelengths'].values
+        self.full_dir = os.path.join(self.sample_dir, self.inner_dir)
 
-        self.intensities = np.array(intensities).mean(axis=0)
-        self.wavelengths = wavelengths
+        samples = self.read_samples(self.full_dir)
+        samples = self.valid_samples(samples)
 
-        self.peak_ixs = None
-        self.peak_intensities = None
-        self.peak_wavelengths = None
+        self.sample = self.mean(samples)
 
-        self.matches = None
+        self.matches = self.match_peaks(threshold=self.match_interval)
 
-
-    def find_peaks(self, width=5, drop_below=1000):
+    def read_samples(self, dir):
         """
 
-        :param width: width in nm
-        :param drop_below:
+        :param dir:
         :return:
         """
-        wavelengths_range = self.wavelengths.max() - self.wavelengths.min()
-        sampling_interval = wavelengths_range / self.wavelengths.shape[0]
-        # relative_ratio = width / wavelengths_range
-        # relative_width = int(relative_ratio * self.wavelengths.shape[0])
-        # v = vector.copy()
-        # v[v < drop_below] = 0
-        # widths = np.arange(0.0001, relative_width, 0.1)
-        # return signal.find_peaks_cwt(vector=vector, widths=widths,
-        #                              min_snr=1, noise_perc=0.1,
-        #                              max_distances=widths,
-        #                              min_length=int(width/space))[1:-1]
+        samples = []
+        for filename in os.listdir(dir):
+            if 'csv' in filename:
+                sample = Sample(os.path.join(dir, filename), self.peak_interval)
+                samples.append(sample)
 
-        self.peak_ixs = peak_ixs = signal.argrelmax(self.intensities, order=int(width / sampling_interval))[0]
-        self.peak_intensities = self.intensities[peak_ixs]
-        self.peak_wavelengths = self.wavelengths[peak_ixs]
+        return samples
 
+    def valid_samples(self, samples):
+        """
 
+        :param samples:
+        :return:
+        """
+        means = np.array([sample.peaks_mean() for sample in samples])
+        norm_means = (means - means.min()) / (means.max() - means.min())
+        mean_of_means = norm_means.mean()
 
-        return peak_ixs, self.peak_wavelengths, self.peak_intensities
+        for sample in samples:
+            norm_mean = (sample.peaks_mean() - means.min()) / (means.max() - means.min())
+            # check for outlier
+            if mean_of_means - self.outlier_interval < norm_mean < mean_of_means + self.outlier_interval:
+                # valid sample
+                sample.is_valid = True
 
-    def match_peaks(self, database, threshold):
+        return [sample for sample in samples if sample.is_valid]
+
+    def mean(self, samples):
+        """
+
+        :param samples:
+        :return:
+        """
+        intensities = []
+        wavelengths = None
+        for sample in samples:
+            intensities.append(sample.sample['intensities'])
+            wavelengths = sample.sample['wavelengths']
+
+        mean_intensities = np.array(intensities).mean(axis=0)
+        return Sample.from_array(name='mean',
+                                 wavelenths=wavelengths,
+                                 intensities=mean_intensities,
+                                 peak_interval=self.peak_interval)
+
+    def match_peaks(self, threshold):
         """
 
         :param database:
@@ -177,24 +236,28 @@ class Analyzer:
         """
         # return like
         # 404.57 nm: Ca
-        matches = {}
-        for peak_w in self.peak_wavelengths:
-            matches[peak_w] = database.search(peak_w, threshold)
+        matches = pd.DataFrame()
+        for peak_w in self.sample.peaks['wavelengths']:
+            matches = matches.append(database.search(peak_w, threshold))
 
-        self.matches = matches
         return matches
+
 
     def plot_data(self, point_peaks=True):
         verticals = []
-        current = self.wavelengths.min()
-        while current < self.wavelengths.max():
+        current = self.sample.sample['wavelengths'].min()
+        while current < self.sample.sample['wavelengths'].max():
             verticals.append(current)
-            current += PEAK_INTERVAL
-        plt.plot(self.wavelengths, self.intensities, c='g')
+            current += self.peak_interval
+        plt.plot(self.sample.sample['wavelengths'], self.sample.sample['intensities'], c='g')
+
+        for vertical in verticals:
+            plt.axvline(x=vertical, c='y', linestyle='--', alpha=0.3)
+
         if point_peaks:
-            plt.scatter(x=self.wavelengths[peak_ixs], y=self.intensities[peak_ixs], c='r')
-        # for vertical in verticals:
-        #     plt.axvline(x=vertical, c='y', linestyle='--', alpha=0.3)
+            plt.scatter(x=self.sample.peaks['wavelengths'], y=self.sample.peaks['intensities'], c='r')
+
+
 
     def plot_matches(self, only=None):
 
@@ -205,7 +268,8 @@ class Analyzer:
                     nodes.append({'wavelength': wavelength,
                                   'element': element,
                                   'nn_peak': peak_w,
-                                  'intensity': self.intensities[np.where(self.wavelengths == peak_w)][0]})   # be careful, this lines ignores equal points!
+                                  'intensity': self.intensities[np.where(self.wavelengths == peak_w)][
+                                      0]})  # be careful, this lines ignores equal points!
 
         for name, group in pd.DataFrame.from_dict(nodes).groupby(by='element'):
             if only is not None:
@@ -224,23 +288,45 @@ class Analyzer:
         pass
 
 
+class Config:
+    """
 
+    """
+
+    def __init__(self, config_path='config.ini'):
+        c = configparser.ConfigParser()
+        c.read(config_path)
+
+        self.db_dir = c['Paths']['db_dir']
+        self.output_dir = c['Paths']['output_dir']
+        self.sample_dir = c['Paths']['sample_dir']
+
+        self.peak_interval = float(c['Params']['peak_interval'])
+        self.match_interval = float(c['Params']['match_interval'])
+        self.outlier_interval = float(c['Params']['outlier_interval'])
+        self.mode = c['Params']['mode']
+
+        self.element_mapping = {elementname: c.get('ElementMapping', elementname).split(',') for elementname in
+                                c.options('ElementMapping')}
 
 
 if __name__ == "__main__":
-    analyzer = Analyzer(csv_dir=CSV_DIR)
-    database = Database(db_path=DB_PATH)
-    (peak_ixs, peak_wavelengths, peak_intensities) = analyzer.find_peaks(width=PEAK_INTERVAL)
-    matches = analyzer.match_peaks(database, MATCH_INTERVAL)
+    config = Config('../config.ini')
+    database = Database(config=config)
+    analyzer = Analyzer(config=config, database=database, inner_dir='toprak1')
 
+    # (peak_ixs, peak_wavelengths, peak_intensities) = analyzer.find_peaks(width=PEAK_INTERVAL)
+    # matches = analyzer.match_peaks(database, MATCH_INTERVAL)
+    #
     plt.figure()
     analyzer.plot_data()
     plt.legend()
-
-    plt.figure()
-    analyzer.plot_data(point_peaks=False)
-    # analyzer.plot_matches()
-    analyzer.plot_matches(only=['K','N','P','C','Al','Cu'])
-    plt.legend()
+    #
+    # plt.figure()
+    # analyzer.plot_data(point_peaks=False)
+    # # analyzer.plot_matches()
+    # analyzer.plot_matches(only=['K','N','P','C','Al','Cu'])
+    # plt.legend()
     plt.show()
 
+    print()

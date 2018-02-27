@@ -15,7 +15,7 @@ import os
 from multiprocessing.dummy import Pool as ThreadPool
 
 
-class Experiment:
+class IOManager:
     def __init__(self):
 
         devices = sb.list_devices()
@@ -82,16 +82,21 @@ class Experiment:
         self.wavelengths = self.wavelengths.flatten()
         return self.wavelengths
 
+    def io_to_dataframe(self):
+        self.get_intensities()
+        self.get_wavelengths()
+        return self.to_dataframe()
+
     def to_dataframe(self):
         return pd.DataFrame({'wavelengths': self.wavelengths,
                              'intensities': self.intensities})
 
 # ========================  IOMANAGER  ========================
-with Experiment() as experiment:
-    intensities = experiment.get_intensities()
-    wavelengths = experiment.get_wavelengths()
+with IOManager() as iomanager:
+    intensities = iomanager.get_intensities()
+    wavelengths = iomanager.get_wavelengths()
 
-    df = experiment.to_dataframe()
+    df = iomanager.to_dataframe()
 
     plt.plot(wavelengths, intensities)
     plt.show()
