@@ -71,40 +71,37 @@ class IOManager:
     def _intensity(self, spectrometer):
         return np.array(spectrometer.intensities(correct_dark_counts=True, correct_nonlinearity=True))
 
-    def get_intensities(self):
+    def _get_intensities(self):
         pool = ThreadPool(2)
         self.intensities = np.array(pool.map(self._intensity, self.spectrometers))
         self.intensities = self.intensities.flatten()
         return self.intensities
 
-    def get_wavelengths(self):
+    def _get_wavelengths(self):
         self.wavelengths = np.array([spectrometer.wavelengths() for spectrometer in self.spectrometers]).flatten()
         self.wavelengths = self.wavelengths.flatten()
         return self.wavelengths
 
     def io_to_dataframe(self):
-        self.get_intensities()
-        self.get_wavelengths()
-        return self.to_dataframe()
-
-    def to_dataframe(self):
-        return pd.DataFrame({'wavelengths': self.wavelengths,
-                             'intensities': self.intensities})
+        return pd.DataFrame({'wavelengths': self._get_wavelengths(),
+                             'intensities': self._get_intensities()})
 
 # ========================  IOMANAGER  ========================
-with IOManager() as iomanager:
-    intensities = iomanager.get_intensities()
-    wavelengths = iomanager.get_wavelengths()
 
-    df = iomanager.to_dataframe()
+def main():
+    with IOManager() as iomanager:
+        intensities = iomanager.get_intensities()
+        wavelengths = iomanager.get_wavelengths()
 
-    plt.plot(wavelengths, intensities)
-    plt.show()
+        df = iomanager.to_dataframe()
 
-    results = pd.DataFrame()
-    results['wavelengths'] = wavelengths
-    results['intensities'] = intensities
-    results.to_csv('../input/gubre/gubre_{}.csv'.format(time.time()))
+        plt.plot(wavelengths, intensities)
+        plt.show()
+
+        results = pd.DataFrame()
+        results['wavelengths'] = wavelengths
+        results['intensities'] = intensities
+        results.to_csv('../input/gubre/gubre_{}.csv'.format(time.time()))
 # ========================  IOMANAGER  ========================
 
 
