@@ -14,6 +14,7 @@ import pandas as pd
 import os
 from multiprocessing.dummy import Pool as ThreadPool
 
+import warnings
 
 class IOManager:
     def __init__(self):
@@ -22,7 +23,7 @@ class IOManager:
 
         # Assert device count
         if len(devices) != 2:
-            raise Exception("Should have 2 devices but we have these:{}".format(devices))
+            warnings.warn("Should have 2 devices but we have these:{}".format(devices))
 
         print(devices)
 
