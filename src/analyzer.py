@@ -145,12 +145,16 @@ class Analyzer:
         norm_means = (means - means.min()) / (means.max() - means.min())
         mean_of_means = norm_means.mean()
 
+        valid_cnt = 0
         for sample in samples:
             norm_mean = (sample.peaks_mean() - means.min()) / (means.max() - means.min())
             # check for outlier
             if mean_of_means - self.outlier_interval < norm_mean < mean_of_means + self.outlier_interval:
                 # valid sample
                 sample.is_valid = True
+                valid_cnt += 1
+
+        print('{} samples have been marked as valid.'.format(valid_cnt))
 
         return [sample for sample in samples if sample.is_valid]
 

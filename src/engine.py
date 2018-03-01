@@ -27,7 +27,7 @@ class Engine:
 
         name = time.time()
         if fake:
-            reading = pd.read_csv('../output/test_sample/1519737006.0222373.csv')
+            reading = pd.read_csv('../output/test_sample/data_toprak1_1518519600.4219213.csv')
             time.sleep(1)
             print('Fake data imported.')
         else:
