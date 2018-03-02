@@ -6,6 +6,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import random
 
 
 class Engine:
@@ -27,9 +28,10 @@ class Engine:
 
         name = time.time()
         if fake:
-            reading = pd.read_csv('../output/test_sample/data_toprak1_1518519600.4219213.csv')
+            fakenum = random.randint(1,10)
+            reading = pd.read_csv('../input/fakesamples/fakesample_{}.csv'.format(fakenum))
             time.sleep(1)
-            print('Fake data imported.')
+            print('Fake data imported. fakesample_{}.csv'.format(fakenum))
         else:
             reading = self.iomanager.io_to_dataframe()
 
@@ -62,14 +64,14 @@ class Engine:
 
 
         # Plot
-        fig, ax = plt.subplots()
+        # fig, ax = plt.subplots()
 
 
-        self.analyzer.plot_data(ax)
+        # self.analyzer.plot_data(ax)
         # self.analyzer.plot_matches(ax)
 
-        ax.legend()
-        plt.show()
+        # ax.legend()
+        # plt.show()
 
 
 

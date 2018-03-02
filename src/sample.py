@@ -41,6 +41,9 @@ class Sample:
         :return: (pd.DataFrame) peaks
         """
         wavelengths_range = self.sample['wavelengths'].max() - self.sample['wavelengths'].min()
+
+        if self.sample['wavelengths'].shape[0] == 0:
+            print('Probably you have same file multiple times. Please delete same occurrences.')
         sampling_interval = wavelengths_range / self.sample['wavelengths'].shape[0]
 
         peak_ixs = signal.argrelmax(self.sample['intensities'].values,

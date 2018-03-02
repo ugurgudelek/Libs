@@ -68,7 +68,7 @@ class OceanViewGui(QDialog):
         choice = QMessageBox.question(self, 'Record', 'Recording Finished!\nDo you want to save recordings to\n{}'.format(self.recordname),
                                       QMessageBox.Yes|QMessageBox.No)
         if choice == QMessageBox.Yes:
-            dir = engine.save_readings(name='test_sample', readings=readings)
+            dir = engine.save_readings(name=self.recordname, readings=readings)
             engine.analyze(dir=dir)
 
         # reset for next iteration
