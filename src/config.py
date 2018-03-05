@@ -20,6 +20,7 @@ class Config:
         self.outlier_interval = float(c['Params']['outlier_interval'])
         self.spectrometer_interval = [float(interval) for interval in c['Params']['spectrometer_interval'].split(',')]
         self.mode = c['Params']['mode']
+        self.fake = False if c['Params']['fake'] == 'False' else True
 
         self.element_mapping = {elementname: c.get('ElementMapping', elementname).split(',') for elementname in
                                 c.options('ElementMapping')}

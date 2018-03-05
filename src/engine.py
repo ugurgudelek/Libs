@@ -20,14 +20,15 @@ class Engine:
         self.analyzer = analyzer
 
         self.output_dir = config.output_dir
+        self.fake = config.fake
 
     def connect(self):
         pass
 
-    def read_io(self, fake=False):
+    def read_io(self):
 
         name = time.time()
-        if fake:
+        if self.fake:
             fakenum = random.randint(1,10)
             reading = pd.read_csv('../input/fakesamples/fakesample_{}.csv'.format(fakenum))
             time.sleep(1)

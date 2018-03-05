@@ -21,6 +21,7 @@ class OceanViewGui(QMainWindow):
         self.dev_mode = True if config.mode == 'dev' else False
 
 
+
     @property
     def remainingrecord(self):
         return self._remainingrecord
@@ -68,7 +69,7 @@ class OceanViewGui(QMainWindow):
         readings = {}
 
         while self.remainingrecord > 0:
-            name, reading = engine.read_io(fake=True)
+            name, reading = engine.read_io()
             readings[name] = reading
             self.remainingrecord -= 1
 

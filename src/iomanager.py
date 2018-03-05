@@ -91,20 +91,16 @@ class IOManager:
 
 def main():
     with IOManager() as iomanager:
-        intensities = iomanager.get_intensities()
-        wavelengths = iomanager.get_wavelengths()
 
-        df = iomanager.to_dataframe()
+        df = iomanager.io_to_dataframe()
 
-        plt.plot(wavelengths, intensities)
+        df.plot(x='wavelengths',y='intensities')
         plt.show()
 
-        results = pd.DataFrame()
-        results['wavelengths'] = wavelengths
-        results['intensities'] = intensities
-        results.to_csv('../input/gubre/gubre_{}.csv'.format(time.time()))
+
 # ========================  IOMANAGER  ========================
 
+# main()
 
 
 
