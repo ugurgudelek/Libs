@@ -10,10 +10,16 @@
     <height>300</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Dialog</string>
+  <property name="acceptDrops">
+   <bool>true</bool>
   </property>
-  <widget class="QWidget" name="">
+  <property name="windowTitle">
+   <string>Libs</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>80</x>
