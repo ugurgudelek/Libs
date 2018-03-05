@@ -1,8 +1,20 @@
+import pandas as pd
+import os
 import math
 import matplotlib.pyplot as plt
+import argparse
+plt.rcParams.update({'axes.titlesize': 'small'})
 
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--nrows', metavar='R', type=int,
+                    help='Number of rows for subplots',
+                    default=None)
+parser.add_argument('--ncols', metavar='C', type=int,
+                    help='Number of rows for subplots',
+                    default=None)
 
-
+args = parser.parse_args()
+print(args)
 
 
 def subplot(dictionary, xname, yname, ncols=None, nrows=None):
@@ -40,3 +52,12 @@ def subplot(dictionary, xname, yname, ncols=None, nrows=None):
 
 
     plt.show()
+
+
+filecontainer = dict()
+for filename in os.listdir():
+    if 'csv' in filename:
+        filecontainer[filename] = pd.read_csv(filename)
+
+filecontainer
+subplot(filecontainer, xname='wavelengths', yname='intensities', nrows=args.nrows, ncols=args.ncols)

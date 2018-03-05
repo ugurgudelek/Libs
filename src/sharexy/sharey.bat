@@ -1,0 +1,1 @@
+python sharexy.py --nrows=1

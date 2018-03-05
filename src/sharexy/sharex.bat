@@ -1,0 +1,1 @@
+python sharexy.py --ncols=1
