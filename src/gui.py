@@ -8,7 +8,7 @@ from iomanager import IOManager
 from analyzer import Analyzer, Database, Sample
 from config import Config
 from engine import Engine
-import matplotlib.pyplot as plt
+from util import subplot
 
 class OceanViewGui(QDialog):
     def __init__(self, engine):
@@ -33,6 +33,7 @@ class OceanViewGui(QDialog):
         loadUi('../ui/oceanview.ui', self)
         self.setWindowTitle('OceanView')
 
+        self.recordnumSpinBox.setValue(10)
         self.recordnumSpinBox.valueChanged.connect(self.on_recordnumSpinBox_valueChanged)
         self.readIOButton.clicked.connect(self.onreadIOButton_clicked)
         self.recordnameLineEdit.textChanged.connect(self.on_recordnameLineEdit_valueChanged)
@@ -50,29 +51,34 @@ class OceanViewGui(QDialog):
     def on_recordnumSpinBox_valueChanged(self):
         self.remainingrecord = self.recordnumSpinBox.value()
 
+
     @pyqtSlot()
     def onreadIOButton_clicked(self):
-        plt.show(block=False)
-        fig = plt.figure()
         readings = {}
+
         while self.remainingrecord > 0:
             name, reading = engine.read_io(fake=True)
             readings[name] = reading
             self.remainingrecord -= 1
 
-            reading.plot(x='wavelengths', y='intensities', label=name)
-            plt.legend()
-            plt.pause(0.1)
-            fig.canvas.draw()
+        # Plot readings
+        subplot(dictionary=readings, xname='wavelengths', yname='intensities', ncols=3)
 
-        choice = QMessageBox.question(self, 'Record', 'Recording Finished!\nDo you want to save recordings to\n{}'.format(self.recordname),
+        # Save readings
+        choice = QMessageBox.question(self, 'Record', 'Recording Finished!\nRecordings are saved to\n{}'.format(self.recordname),
+                                      QMessageBox.Ok)
+
+        dir = engine.save_readings(name=self.recordname, readings=readings)
+
+        # Analyze readings
+        choice = QMessageBox.question(self, 'Analyze',
+                                      'Do you want to analyze {}'.format(self.recordname),
                                       QMessageBox.Yes|QMessageBox.No)
         if choice == QMessageBox.Yes:
-            dir = engine.save_readings(name=self.recordname, readings=readings)
             engine.analyze(dir=dir)
 
-        # reset for next iteration
-        self._remainingrecord = self.recordnumSpinBox.value()
+        # reset for next record
+        self.remainingrecord = self.recordnumSpinBox.value()
 
 config = Config('../config.ini')
 engine = Engine(iomanager=IOManager(),
@@ -84,7 +90,6 @@ engine = Engine(iomanager=IOManager(),
 app = QApplication(sys.argv)
 widget = OceanViewGui(engine=engine)
 widget.show()
-
 
 
 
