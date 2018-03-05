@@ -60,18 +60,18 @@ class Engine:
         return path
 
     def analyze(self, dir):
-        matches = self.analyzer.process_samples(dir)
-
+        (sample, matches) = self.analyzer.process_samples(dir)
+        print()
 
         # Plot
-        # fig, ax = plt.subplots()
+        fig, ax = plt.subplots()
 
 
-        # self.analyzer.plot_data(ax)
-        # self.analyzer.plot_matches(ax)
+        self.analyzer.plot_data(ax, point_peaks=True, draw_verticals=False)
+        self.analyzer.plot_matches(ax)
 
-        # ax.legend()
-        # plt.show()
+        ax.legend()
+        plt.show()
 
 
 

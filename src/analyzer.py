@@ -9,25 +9,25 @@ from sample import Sample
 
 
 
-# TODO S:
+
 # DONE:fix find peak interval (nm) and average them but look for std in peaks because outliers can be found.
 
 # DONE:fix elements map
 # DONE:fix database read
 
-# make gui to read sample from spectrometer.
+# DONE:make gui to read sample from spectrometer.
 # DONE:fix database issues
 
-# get new excel
-# create calibration curve
+# todo:get new excel
+# todo:create calibration curve
 
-# gui
+# region:gui
 # ---
-# save only amount of N (textbox maybe)
-# killi, kumlu, silt radio button
-# logos of companies
+# todo:save only amount of N (textbox maybe)
+# todo:killi, kumlu, silt radio button
+# todo:logos of companies
 
-# maybe developer mode on/off
+# DONE: maybe developer mode on/off
 
 
 # DONE: config txt for nm interval, paths, dev on/off
@@ -42,6 +42,7 @@ class Database:
 
         self.element_mapping = config.element_mapping
         self.db_dir = config.db_dir
+        self.spectrometer_interval = config.spectrometer_interval
 
         self.database = self._open_db()
         self._filter_db()
@@ -57,8 +58,15 @@ class Database:
 
         for filename in os.listdir(self.db_dir):
             if 'csv' in filename:
-                database = database.append(pd.read_csv(os.path.join(self.db_dir, filename), skipinitialspace=True))
+                # drop extension to check element mapping
+                if filename.split('.')[0] in self.element_mapping.keys():
+                    database = database.append(pd.read_csv(os.path.join(self.db_dir, filename), skipinitialspace=True))
 
+        # drop out-of-range database
+        database = database.loc[(database['nm'] > self.spectrometer_interval[0]) &
+                                (database['nm'] < self.spectrometer_interval[1])]
+
+        dataset = database.reset_index(drop=True)
         return database
 
     def _filter_db(self):
@@ -81,17 +89,11 @@ class Database:
         :param threshold:
         :return: (pd.DataFrame) matches: values +- threshold
         """
-
-        return self.database.loc[((self.database['nm'] - threshold) < value) &
+        found = self.database.loc[((self.database['nm'] - threshold) < value) &
                                  (value < (self.database['nm'] + threshold))]
+        return found
 
-        # matches = defaultdict(list)
-        # for (element, wavelengths) in self.database.items():
-        #     for wavelength in wavelengths:
-        #         if wavelength - threshold < value < wavelength + threshold:
-        #             matches[element].append(wavelength)
-        #
-        # return matches
+
 
 
 
@@ -113,17 +115,28 @@ class Analyzer:
 
 
     def process_samples(self, dir):
+        """
+
+        Args:
+            dir:
+
+        Returns:
+
+        """
         samples = self.read_samples(dir)
-        samples = self.valid_samples(samples)
+        samples = self.validate_samples(samples)
         self.sample = sample = self.mean(samples)
-        self.matches = matches = self.match_peaks(threshold=self.match_interval)
+        self.matches = matches = self.match_peaks(threshold=self.match_interval).reset_index(drop=True)
         return (sample, matches)
 
     def read_samples(self, dir):
         """
 
-        :param dir:
-        :return:
+        Args:
+            dir:
+
+        Returns:
+
         """
         samples = []
         for filename in os.listdir(dir):
@@ -135,7 +148,7 @@ class Analyzer:
 
         return samples
 
-    def valid_samples(self, samples):
+    def validate_samples(self, samples):
         """
 
         :param samples:
@@ -188,14 +201,26 @@ class Analyzer:
         """
         # return like
         # 404.57 nm: Ca
-        matches = pd.DataFrame()
+        matches = pd.DataFrame(columns=['name', 'nm', 'peak_nm'])
         for peak_w in self.sample.peaks['wavelengths']:
-            matches = matches.append(self.database.search(peak_w, threshold))
+            found = self.database.search(peak_w, threshold)
+            found['peak_nm'] = peak_w
+            matches = matches.append(found)
 
         return matches
 
 
-    def plot_data(self, ax, point_peaks=True):
+    def plot_data(self, ax, point_peaks=True, draw_verticals=True):
+        """
+
+        Args:
+            ax:
+            point_peaks:
+            draw_verticals:
+
+        Returns:
+
+        """
         # chunk whole spectrum to the little pieces.
         # start with min, end with max.
         verticals = []
@@ -205,26 +230,38 @@ class Analyzer:
             current += self.peak_interval
         ax.plot(self.sample.sample['wavelengths'], self.sample.sample['intensities'], c='g')
 
-        # draw vertical lines
-        for vertical in verticals:
-            ax.axvline(x=vertical, c='y', linestyle='--', alpha=0.3)
+        if draw_verticals:
+            # draw vertical lines
+            for vertical in verticals:
+                ax.axvline(x=vertical, c='y', linestyle='--', alpha=0.3)
 
         if point_peaks:
-            ax.scatter(x=self.sample.peaks['wavelengths'], y=self.sample.peaks['intensities'], c='r')
+            ax.scatter(x=self.sample.peaks['wavelengths'], y=self.sample.peaks['intensities'], c='r', marker='x')
 
 
     def plot_matches(self, ax,elements=None):
+        """
 
-        # TODO: fix this function
+        Args:
+            ax:
+            elements:
+
+        Returns:
+
+        """
+
         matches = self.matches.copy()
         sample = self.sample.sample.copy()
-        sample.index = sample['wavelengths']
-        matches['intensities'] = sample[matches['nm'].values, 'intensities']
-
-
+        sample.index = sample['wavelengths']  # change index for easy use with .loc
 
         if elements is not None:
             matches = matches.loc[matches['name'].isin(elements)]
+
+        # fetch intensities from sample for each peak_nm in matches
+        matches['intensities'] = matches.apply(lambda row: sample.loc[row['peak_nm'], 'intensities'], axis=1)
+
+
+
         groups = matches.groupby('name')
 
         ax.margins(0.05)  # Optional, just adds 5% padding to the autoscaling

@@ -1,8 +1,10 @@
 import sys
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QApplication, QDialog, QSpinBox, QMessageBox, QLineEdit
+from PyQt5.QtCore import pyqtSlot,Qt
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication, QDialog, QSpinBox, QMessageBox, QLineEdit, QMainWindow, QGraphicsView, QLabel, QStyle, QSizePolicy
 from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
+from PyQt5.QtGui import QIcon, QPen, QPixmap
 
 from iomanager import IOManager
 from analyzer import Analyzer, Database, Sample
@@ -10,13 +12,13 @@ from config import Config
 from engine import Engine
 from util import subplot
 
-class OceanViewGui(QDialog):
-    def __init__(self, engine):
+class OceanViewGui(QMainWindow):
+    def __init__(self, engine, config):
         super(OceanViewGui, self).__init__()
         self.init_ui()
-
         self.engine = engine
-        self._remainingrecord = self.recordnumSpinBox.value()
+
+        self.dev_mode = True if config.mode == 'dev' else False
 
 
     @property
@@ -30,8 +32,17 @@ class OceanViewGui(QDialog):
         QtWidgets.qApp.processEvents()
 
     def init_ui(self):
-        loadUi('../ui/oceanview.ui', self)
+        loadUi('../ui/oceanview_mainw.ui', self)
         self.setWindowTitle('OceanView')
+
+        self.setWindowIcon(QIcon('../input/image.png'))
+
+        pixmap = QPixmap('../input/image.png')
+        self.testlabel.setPixmap(pixmap)
+        self.testlabel.setScaledContents(True)
+        self.testlabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.testlabel.show()
+
 
         self.recordnumSpinBox.setValue(10)
         self.recordnumSpinBox.valueChanged.connect(self.on_recordnumSpinBox_valueChanged)
@@ -61,21 +72,24 @@ class OceanViewGui(QDialog):
             readings[name] = reading
             self.remainingrecord -= 1
 
-        # Plot readings
-        subplot(dictionary=readings, xname='wavelengths', yname='intensities', ncols=3)
-
         # Save readings
         choice = QMessageBox.question(self, 'Record', 'Recording Finished!\nRecordings are saved to\n{}'.format(self.recordname),
                                       QMessageBox.Ok)
 
         dir = engine.save_readings(name=self.recordname, readings=readings)
 
-        # Analyze readings
-        choice = QMessageBox.question(self, 'Analyze',
+        if self.dev_mode:
+            # Plot readings
+            subplot(dictionary=readings, xname='wavelengths', yname='intensities', ncols=3)
+
+            # Analyze readings
+            choice = QMessageBox.question(self, 'Analyze',
                                       'Do you want to analyze {}'.format(self.recordname),
                                       QMessageBox.Yes|QMessageBox.No)
-        if choice == QMessageBox.Yes:
-            engine.analyze(dir=dir)
+
+
+            if choice == QMessageBox.Yes:
+                engine.analyze(dir=dir)
 
         # reset for next record
         self.remainingrecord = self.recordnumSpinBox.value()
@@ -88,7 +102,8 @@ engine = Engine(iomanager=IOManager(),
 
 
 app = QApplication(sys.argv)
-widget = OceanViewGui(engine=engine)
+
+widget = OceanViewGui(engine=engine, config=config)
 widget.show()
 
 
