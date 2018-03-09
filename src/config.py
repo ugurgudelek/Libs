@@ -14,6 +14,7 @@ class Config:
         self.db_dir = c['Paths']['db_dir']
         self.output_dir = c['Paths']['output_dir']
         # self.sample_dir = c['Paths']['sample_dir']
+        self.calibration_path = c['Paths']['calibration_path']
 
         self.peak_interval = float(c['Params']['peak_interval'])
         self.match_interval = float(c['Params']['match_interval'])

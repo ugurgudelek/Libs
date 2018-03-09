@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 from sample import Sample
 
+from database import Database
+
 
 
 
@@ -33,67 +35,6 @@ from sample import Sample
 # DONE: config txt for nm interval, paths, dev on/off
 
 
-class Database:
-    """
-
-    """
-
-    def __init__(self, config):
-
-        self.element_mapping = config.element_mapping
-        self.db_dir = config.db_dir
-        self.spectrometer_interval = config.spectrometer_interval
-
-        self.database = self._open_db()
-        self._filter_db()
-        self.database.sort_values(by=['name', 'nm'], inplace=True)
-
-    def _open_db(self):
-        """
-        Reads excel file.
-        Returns dictonary which has keys as elements and values as wavelength
-        """
-
-        database = pd.DataFrame()
-
-        for filename in os.listdir(self.db_dir):
-            if 'csv' in filename:
-                # drop extension to check element mapping
-                if filename.split('.')[0] in self.element_mapping.keys():
-                    database = database.append(pd.read_csv(os.path.join(self.db_dir, filename), skipinitialspace=True))
-
-        # drop out-of-range database
-        database = database.loc[(database['nm'] > self.spectrometer_interval[0]) &
-                                (database['nm'] < self.spectrometer_interval[1])]
-
-        dataset = database.reset_index(drop=True)
-        return database
-
-    def _filter_db(self):
-        """
-        Filter database with respect to database mapping
-        :return:
-        """
-
-        # reverse the mapping
-        inverse_db = {}
-        for (_from, _tos) in self.element_mapping.items():
-            inverse_db.update({_to: _from for _to in _tos})
-
-        self.database['name'] = self.database['name'].map(inverse_db)
-
-    def search(self, value, threshold):
-        """
-        Searchs for only one value within the range of threshold in entire database
-        :param value:
-        :param threshold:
-        :return: (pd.DataFrame) matches: values +- threshold
-        """
-        found = self.database.loc[((self.database['nm'] - threshold) < value) &
-                                 (value < (self.database['nm'] + threshold))]
-        return found
-
-
 
 
 
@@ -113,6 +54,9 @@ class Analyzer:
 
         self.database = database
 
+        self.sample = None
+        self.matches = None
+
 
     def process_samples(self, dir):
         """
@@ -125,9 +69,10 @@ class Analyzer:
         """
         samples = self.read_samples(dir)
         samples = self.validate_samples(samples)
-        self.sample = sample = self.mean(samples)
-        self.matches = matches = self.match_peaks(threshold=self.match_interval).reset_index(drop=True)
-        return (sample, matches)
+        self.sample = self.mean(samples)
+        self.matches = self.match_peaks(threshold=self.match_interval).reset_index(drop=True)
+
+        return self.sample, self.matches
 
     def read_samples(self, dir):
         """
@@ -207,6 +152,13 @@ class Analyzer:
             found['peak_nm'] = peak_w
             matches = matches.append(found)
 
+        # find related peak intensities
+        sample = self.sample.sample.copy()
+        sample.index = sample['wavelengths']  # change index for easy use with .loc
+
+        # fetch intensities from sample for each peak_nm in matches
+        matches['peak_intensities'] = matches.apply(lambda row: sample.loc[row['peak_nm'], 'intensities'], axis=1)
+
         return matches
 
 
@@ -239,7 +191,8 @@ class Analyzer:
             ax.scatter(x=self.sample.peaks['wavelengths'], y=self.sample.peaks['intensities'], c='r', marker='x')
 
 
-    def plot_matches(self, ax,elements=None):
+
+    def plot_matches(self, ax):
         """
 
         Args:
@@ -250,33 +203,11 @@ class Analyzer:
 
         """
 
-        matches = self.matches.copy()
-        sample = self.sample.sample.copy()
-        sample.index = sample['wavelengths']  # change index for easy use with .loc
-
-        if elements is not None:
-            matches = matches.loc[matches['name'].isin(elements)]
-
-        # fetch intensities from sample for each peak_nm in matches
-        matches['intensities'] = matches.apply(lambda row: sample.loc[row['peak_nm'], 'intensities'], axis=1)
-
-
-
-        groups = matches.groupby('name')
+        groups = self.matches.groupby('name')
 
         ax.margins(0.05)  # Optional, just adds 5% padding to the autoscaling
         for name, group in groups:
-            ax.scatter(x=group['nm'], y=group['intensities'], marker='o', label=name)
-
-
-
-        # for name, group in pd.DataFrame.from_dict(nodes).groupby(by='element'):
-        #     if only is not None:
-        #         if name in only:
-        #             plt.scatter(x=group['wavelength'], y=group['intensity'], label=name, alpha=1)
-        #     else:
-        #         plt.scatter(x=group['wavelength'], y=group['intensity'], label=name, alpha=1)
-
+            ax.scatter(x=group['nm'], y=group['peak_intensities'], marker='o', label=name)
 
 
 

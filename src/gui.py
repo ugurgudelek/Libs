@@ -11,6 +11,7 @@ from analyzer import Analyzer, Database, Sample
 from config import Config
 from engine import Engine
 from util import subplot
+from calibration import Calibrator
 
 class OceanViewGui(QMainWindow):
     def __init__(self, engine, config):
@@ -33,6 +34,7 @@ class OceanViewGui(QMainWindow):
         QtWidgets.qApp.processEvents()
 
     def init_ui(self):
+
         loadUi('../ui/oceanview_mainw.ui', self)
         self.setWindowTitle('OceanView')
 
@@ -45,12 +47,15 @@ class OceanViewGui(QMainWindow):
         self.testlabel.show()
 
 
+
         self.recordnumSpinBox.setValue(10)
         self.recordnumSpinBox.valueChanged.connect(self.on_recordnumSpinBox_valueChanged)
         self.readIOButton.clicked.connect(self.onreadIOButton_clicked)
         self.recordnameLineEdit.textChanged.connect(self.on_recordnameLineEdit_valueChanged)
 
         self.remainingrecord = self.recordnumSpinBox.value()
+
+
 
     ####################################
     #             EVENTS               #
@@ -98,6 +103,7 @@ class OceanViewGui(QMainWindow):
 config = Config('../config.ini')
 engine = Engine(iomanager=IOManager(),
                 analyzer=Analyzer(config=config, database=Database(config)),
+				calibrator=Calibrator(config=config),
                 config=config)
 
 

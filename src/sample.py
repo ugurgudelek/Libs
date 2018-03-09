@@ -18,7 +18,8 @@ class Sample:
 
     @classmethod
     def from_file(cls, name, path, peak_interval, is_valid):
-        dataframe = pd.read_csv(path)
+        f = open(r'{}'.format(path))
+        dataframe = pd.read_csv(f)
         return cls(name=name, dataframe=dataframe,
                    peak_interval=peak_interval, is_valid=is_valid)
 
