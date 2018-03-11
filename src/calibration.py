@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 class CalibrationColumn:
     """
@@ -12,12 +14,13 @@ class CalibrationColumn:
     def __init__(self, colname):
 
         parts = colname.split(' ')
-        self.element = parts[0]
-        self.id = parts[1]
-        self.nm = parts[-1]
+        self.raw_name = parts[0]
+        self.name = parts[0].lower()
+        self.id = int(parts[1])
+        self.nm = float(parts[-1])
 
     def __str__(self):
-        return '{el} {id} @ {nm}'.format(el=self.element,
+        return '{el} {id} @ {nm}'.format(el=self.raw_name,
                                          id=self.id,
                                          nm=self.nm)
 
@@ -36,7 +39,7 @@ class Calibrator:
 
         filename = os.listdir(self.input_dir)[0]
         self.xlsx = pd.ExcelFile(os.path.join(self.input_dir, filename))
-        self.req_elements = self.extract_req_elements(sheet_name=self.xlsx.sheet_names[0]) # parse first sheet only
+        self.req_elements = self.extract_req_elements(sheet_name=self.xlsx.sheet_names[0])  # parse first sheet only
 
     def _parse_sheet(self, sheet_name):
         return self.xlsx.parse(sheet_name=sheet_name, header=1)
@@ -45,13 +48,8 @@ class Calibrator:
         sheet = self._parse_sheet(sheet_name=sheet_name)
         # calibration_cols = [colname for colname in xlsx.columns if 'cal' in colname]
         # elements_at = [xlsx.loc[0, colname] for colname in calibration_cols]
-        elements_at = sheet.columns[7:].values
-        elements = dict()
-        for element_at in elements_at:
-            element_name = element_at.split('@')[0].strip()
-            nm = float(element_at.split('@')[1].strip())
-            elements[element_name] = nm
-        return elements
+        element_cols = sheet.columns[7:].values
+        return [CalibrationColumn(element_col) for element_col in element_cols]
 
     def search_in_matches(self, matches, epsilon):
         """
@@ -68,15 +66,13 @@ class Calibrator:
             return 0 if len(series) == 0 else series.max()
 
         found = dict()
-        for element, at in self.req_elements.items():
-            name, num = element.split(' ')
-            df = matches.loc[matches['name'] == name.lower()]
-            df = df.loc[((df['nm'] - epsilon) < at) & (at < (df['nm'] + epsilon))]
+        for element in self.req_elements:
+
+            df = matches.loc[matches['name'] == element.name]
+            df = df.loc[((df['nm'] - epsilon) < element.nm) & (element.nm < (df['nm'] + epsilon))]
 
             intensity = _max(df['peak_intensities'])
-
-            col_name = '{name} {num} @ {at}'.format(name=name, num=num, at=at)
-            found[col_name] = intensity
+            found[str(element)] = intensity
 
         return found
 
@@ -85,6 +81,23 @@ class Calibrator:
         sheet = self._parse_sheet(sheet_name=sheet_name)
         sheet[col_names] = values
         sheet.to_excel(os.path.join(self.output_dir, '{}.xlsx'.format(sheet_name)))
+
+    def fit(self, dataframe):
+        """
+
+        Args:
+            dataframe(pd.DataFrame):
+
+        Returns:
+
+        """
+        raise Exception("These files are implement in calibration_fit.ipynb")
+
+    def write_to_csv(self, dataframe, loc_name):
+        dataframe.to_csv(os.path.join(self.output_dir, '{}.csv'.format(loc_name)), index=False)
+
+
+
 
 
 
