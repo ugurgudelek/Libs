@@ -203,15 +203,10 @@ if __name__ == '__main__':
                                           output_dir=config.calibration_output_dir),
                     config=config)
 
-    # readings = {}
-    # remainingrecord = 3
-    # while remainingrecord > 0:
-    #     name, reading = engine.read_io()
-    #     readings[name] = reading
-    #     remainingrecord -= 1
-    # path = engine.save_readings(name='test', readings=readings)
-
     engine.pipeline(loc_name='niğde')
+    engine.pipeline(loc_name='adana')
+    engine.pipeline(loc_name='yozgat')
+    engine.pipeline(loc_name='samsun')
 
 
 
