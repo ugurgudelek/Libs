@@ -42,7 +42,7 @@ class Calibrator:
         self.req_elements = self.extract_req_elements(sheet_name=self.xlsx.sheet_names[0])  # parse first sheet only
 
     def _parse_sheet(self, sheet_name):
-        return self.xlsx.parse(sheetname=sheet_name, header=1)
+        return self.xlsx.parse(sheet_name, header=1)
 
     def extract_req_elements(self, sheet_name):
         sheet = self._parse_sheet(sheet_name=sheet_name)

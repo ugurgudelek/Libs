@@ -8,7 +8,7 @@ from sample import Sample
 
 from database import Database
 
-
+from config import Config
 
 
 
@@ -107,7 +107,8 @@ class Analyzer:
         for sample in samples:
             norm_mean = (sample.peaks_mean() - means.min()) / (means.max() - means.min())
             # check for outlier
-            if mean_of_means - self.outlier_interval < norm_mean < mean_of_means + self.outlier_interval:
+            # if mean_of_means - self.outlier_interval < norm_mean < mean_of_means + self.outlier_interval:
+            if  mean_of_means < norm_mean:  # take only if im above mean.
                 # valid sample
                 sample.is_valid = True
                 valid_cnt += 1
@@ -215,12 +216,23 @@ class Analyzer:
 
 
 
-#
-# if __name__ == "__main__":
-#     config = Config('../config.ini')
-#     database = Database(config=config)
-#     analyzer = Analyzer(config=config, database=database, inner_dir='toprak1')
-#
+
+if __name__ == "__main__":
+    config = Config('../config.ini')
+    database = Database(config=config)
+    analyzer = Analyzer(config=config, database=database)
+
+    (sample, matches) = analyzer.process_samples('../output/samples/adana/1')
+
+
+    # Plot
+    fig, ax = plt.subplots()
+
+    analyzer.plot_data(ax, point_peaks=True, draw_verticals=False)
+    analyzer.plot_matches(ax)
+
+    ax.legend()
+    plt.show()
 #     # (peak_ixs, peak_wavelengths, peak_intensities) = analyzer.find_peaks(width=PEAK_INTERVAL)
 #     # matches = analyzer.match_peaks(database, MATCH_INTERVAL)
 #     #
