@@ -7,8 +7,8 @@
 
 from bokeh.plotting import figure,show, output_file, output_notebook,save
 from bokeh.models import ColumnDataSource, HoverTool, Div
-from bokeh.models.widgets import Slider, Select
-from bokeh.layouts import layout, widgetbox, row
+from bokeh.models.widgets import Slider, Select, Panel, Tabs
+from bokeh.layouts import widgetbox, row
 from bokeh.io import curdoc
 from bokeh.application.handlers import FunctionHandler
 from bokeh.application import Application
@@ -51,24 +51,47 @@ def make_dataset(dataset, xname, yname):
     df = pd.DataFrame()
     df['xs'] = dataset[xname]
     df['ys'] = dataset[yname]
+    df['xname'] = xname
+    df['yname'] = yname
     df['sample_id'] = dataset['sample_id']
+    df['lab_no'] = dataset['lab_no']
+    df['N'] = dataset['%N']
+    df['C'] = dataset['%C']
+    df['K'] = dataset['%K']
+    df['P'] = dataset['%P']
     return df
 
-def make_plot(src):
-    p = figure(plot_height=600, plot_width=700, title="Kalibrasyon Grafikleri", toolbar_location=None)
-    p.circle(source=src, x='xs', y='ys', line_color='blue')
-    hover = HoverTool(tooltips=[("Sample ID", "@sample_id")])
+def make_plot(src, xname, yname):
+    p = figure(plot_height=700, plot_width=700, title="Kalibrasyon Grafikleri",
+               toolbar_location="below",
+               toolbar_sticky=False)
+    p.circle(source=src, x='xs', y='ys', line_color='blue', size=8)
+    hover = HoverTool(tooltips=[("Sample ID", "@sample_id"),
+                                ("Lab No", "@lab_no"),
+                                ("%N","@N"),
+                                ("%C","@C"),
+                                ("%K","@K"),
+                                ("%P","@P"),
+                                ("index", "$index"),
+                                ("data (x,y)", "($x, $y)"),
+                                ("coor (x,y)", "($sx, $sy)")
+                                ])
     p.add_tools(hover)
     return p
 
 def update(attr, old, new):
+    xname = display_attribute_selector.value
+    yname = element_selector.value
+
     new_source = make_dataset(datasets[loc_selector.value],
-                                    element_selector.value,
-                                    display_attribute_selector.value)
+                              xname,
+                              yname)
     new_source = ColumnDataSource(new_source)
     src.data.update(new_source.data)
+    p.xaxis.axis_label = xname
+    p.yaxis.axis_label = yname
 
-loc_names = ['adana','samsun','yozgat']
+loc_names = ['adana','samsun','yozgat', 'nigde']
 datasets = read_datasets()
 elements = list(datasets['adana'].columns.values[7:])
 display_attributes = ['%N','%C','%K','%P']
@@ -89,14 +112,21 @@ element_selector.on_change('value', update)
 controls = widgetbox([loc_selector, display_attribute_selector, element_selector])
 
 # initial dataset
-src = ColumnDataSource(make_dataset(datasets[loc_selector.value],
-                                    element_selector.value,
-                                    display_attribute_selector.value))
-p = make_plot(src)
+xname = display_attribute_selector.value
+yname = element_selector.value
 
+src = ColumnDataSource(make_dataset(datasets[loc_selector.value],
+                              xname,
+                              yname))
+p = make_plot(src,xname,yname)
+p.xaxis.axis_label = xname
+p.yaxis.axis_label = yname
 
 layout = row(controls, p)
-curdoc().add_root(layout)
+
+tab = Panel(child=layout, title="Kalibrasyon")
+tabs = Tabs(tabs=[tab])
+curdoc().add_root(tabs)
 
 
 
