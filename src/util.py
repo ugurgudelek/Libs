@@ -13,7 +13,6 @@ from bokeh.layouts import layout, widgetbox, row
 from bokeh.io import curdoc
 
 
-from bokeh.client import show_session
 
 def rename(path, search_name):
 
