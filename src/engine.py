@@ -203,10 +203,10 @@ if __name__ == '__main__':
                                           output_dir=config.calibration_output_dir),
                     config=config)
 
-    # engine.pipeline(loc_name='niğde')
+    engine.pipeline(loc_name='niğde')
     engine.pipeline(loc_name='adana')
-    # engine.pipeline(loc_name='yozgat')
-    # engine.pipeline(loc_name='samsun')
+    engine.pipeline(loc_name='yozgat')
+    engine.pipeline(loc_name='samsun')
 
 
 
