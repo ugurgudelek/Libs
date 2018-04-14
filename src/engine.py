@@ -5,7 +5,7 @@ import time
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import seaborn as sns
 import random
 
 from config import Config
@@ -13,6 +13,11 @@ from iomanager import IOManager
 from database import Database
 from analyzer import Analyzer
 from calibration import Calibrator
+
+from PyQt5.QtWidgets import QTableWidgetItem
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
 class Engine:
@@ -118,8 +123,8 @@ class Engine:
 
         name = time.time()
         if self.fake:
-            fakenum = random.randint(1,10)
-            reading = pd.read_csv(os.path.join(self.fake_sample_dir,'fakesample_{}.csv'.format(fakenum)))
+            fakenum = random.randint(1, 10)
+            reading = pd.read_csv(os.path.join(self.fake_sample_dir, 'fakesample_{}.csv'.format(fakenum)))
             time.sleep(0.1)
             print('Fake data imported. fakesample_{}.csv'.format(fakenum))
         else:
@@ -231,6 +236,29 @@ class Engine:
         # self.calibrator.fit(calibration_df)
 
 
+    def fit(self, X):
+        return self.calibrator.fit(X)
+
+    def data_to_row(self, table, numuneadi, element, miktar, birim, durumu):
+        current_row = table.rowCount()
+        table.setRowCount(current_row + 1)
+        table.setItem(current_row, 0, QTableWidgetItem(numuneadi))
+        table.setItem(current_row, 1, QTableWidgetItem(element))
+        table.setItem(current_row, 2, QTableWidgetItem(miktar))
+        table.setItem(current_row, 3, QTableWidgetItem(birim))
+        table.setItem(current_row, 4, QTableWidgetItem(durumu))
+
+
+    def result_image(self):
+        df = pd.DataFrame()
+        df['x'] = ['N', 'O.M', 'P2O5', 'K2O']
+        df['y'] = [10,20,30,40]
+
+        fig, ax = plt.subplots(figsize=(100, 100))
+        ax = sns.barplot(x='x', y='y', data=df, ax=ax)
+        canvas = FigureCanvas(ax.figure)
+
+        return canvas
 
 if __name__ == '__main__':
 

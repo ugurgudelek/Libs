@@ -89,10 +89,11 @@ class IOManager:
 
 # ========================  IOMANAGER  ========================
 
-def main():
+if __name__ == "__main__":
     with IOManager() as iomanager:
-
+        print(iomanager.spectrometers)
         df = iomanager.io_to_dataframe()
+        print("Done!")
 
         df.plot(x='wavelengths',y='intensities')
         plt.show()

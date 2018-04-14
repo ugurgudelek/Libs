@@ -14,6 +14,19 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="4" column="3">
+    <widget class="QPushButton" name="analyzeButton">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Analizi Başlat</string>
+     </property>
+    </widget>
+   </item>
    <item row="4" column="0">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
@@ -54,29 +67,26 @@
      </item>
     </layout>
    </item>
-   <item row="4" column="3">
-    <widget class="QPushButton" name="analyzeButton">
+   <item row="0" column="0" colspan="4">
+    <widget class="QLabel" name="label_5">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="text">
-      <string>Analizi Başlat</string>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="3">
-    <widget class="QPushButton" name="backtohomeButton">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="text">
-      <string>Geri</string>
+      <string>ANALİZ</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
@@ -107,26 +117,16 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="0" colspan="4">
-    <widget class="QLabel" name="label_5">
+   <item row="8" column="3">
+    <widget class="QPushButton" name="backtohomeButton">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
      <property name="text">
-      <string>ANALİZ</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <string>Geri</string>
      </property>
     </widget>
    </item>
@@ -161,84 +161,11 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <row>
-      <property name="text">
-       <string>1</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>2</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>3</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>4</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>5</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>6</string>
-      </property>
-     </row>
-     <column>
-      <property name="text">
-       <string>Numune Adı</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Element</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Miktar</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Birim</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Durumu</string>
-      </property>
-     </column>
-     <item row="0" column="0">
-      <property name="text">
-       <string/>
-      </property>
-     </item>
-    </widget>
-   </item>
-   <item row="7" column="0" colspan="2">
-    <widget class="QLabel" name="resultLabel">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+     <property name="rowCount">
+      <number>0</number>
      </property>
-     <property name="minimumSize">
-      <size>
-       <width>364</width>
-       <height>265</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>resultLabel</string>
+     <property name="columnCount">
+      <number>0</number>
      </property>
     </widget>
    </item>
@@ -255,6 +182,9 @@
       <widget class="QLineEdit" name="remainingrecordLE"/>
      </item>
     </layout>
+   </item>
+   <item row="8" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="resultLayout"/>
    </item>
   </layout>
  </widget>

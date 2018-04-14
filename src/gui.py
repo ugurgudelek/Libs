@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5.QtCore import pyqtSlot, Qt, QRect
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QDialog, QPushButton, QSpinBox, QMessageBox, QLineEdit, QMainWindow, \
     QGraphicsView, QLabel, QStyle, QSizePolicy, QWidget, QTableWidgetItem, QHeaderView, QComboBox
@@ -13,6 +13,8 @@ from config import Config
 from engine import Engine
 from util import subplot
 from calibration import Calibrator
+
+
 
 import pandas as pd
 import os
@@ -151,16 +153,10 @@ class OceanViewGui(QMainWindow):
     @staticmethod
     def createTable(tableWidget):
         # Create table
-        tableWidget.setRowCount(4)
-        tableWidget.setColumnCount(2)
-        tableWidget.setItem(0, 0, QTableWidgetItem("Cell (1,1)"))
-        tableWidget.setItem(0, 1, QTableWidgetItem("Cell (1,2)"))
-        tableWidget.setItem(1, 0, QTableWidgetItem("Cell (2,1)"))
-        tableWidget.setItem(1, 1, QTableWidgetItem("Cell (2,2)"))
-        tableWidget.setItem(2, 0, QTableWidgetItem("Cell (3,1)"))
-        tableWidget.setItem(2, 1, QTableWidgetItem("Cell (3,2)"))
-        tableWidget.setItem(3, 0, QTableWidgetItem("Cell (4,1)"))
-        tableWidget.setItem(3, 1, QTableWidgetItem("Cell (4,2)"))
+        tableWidget.setRowCount(0)
+        tableWidget.setColumnCount(5)
+        tableWidget.setHorizontalHeaderLabels(['Numune Adı', 'Element', 'Miktar', 'Birim', 'Durumu'])
+
 
     def assign_triggers(self):
         self.girisButton.clicked.connect(self.on_girisButton_clicked)
@@ -264,6 +260,8 @@ class OceanViewGui(QMainWindow):
         for self.remainingrecord in self.engine.read_remainingrecords(self.remainingrecord):
             readings = self.engine.readings
 
+
+
         dir = self.engine.save_readings()
 
         # show saved popup
@@ -272,12 +270,29 @@ class OceanViewGui(QMainWindow):
         # analyze and show peaks and its neighbours
         (sample, matches) = self.engine.analyze(dir=dir, plotnow=True)
 
-        # todo: fit calibration
+        # match elements in calibration excel with peak values.
+        found_el_intensity_matches = self.engine.calibrate(matches=matches)
 
-        # todo: fill table
+
+        # todo: read calibration file
+
+        # done: implement fit calibration
+
+        numuneadi = self.engine.numune_info['numuneadi']
+        element = 'N 5 @ 443.506'
+        X = self.engine.fit(found_el_intensity_matches[element])
+        miktar = str(X)
+        birim = self.engine.numune_info['birim']
+        durumu = 'NA'
+
+        # done: fill table
+        self.engine.data_to_row(self.analiz_window.tableWidget, numuneadi, element, miktar, birim, durumu)
 
         # todo: show results
+        self.engine.result_image()
 
+        # reset remainingrecord
+        self.remainingrecord = self.analiz_window.howmanyrecordSpinBox.value()
 
 
 
@@ -297,18 +312,25 @@ class OceanViewGui(QMainWindow):
         self.analiz_window.analyzeButton.clicked.connect(self.on_analyzeButton_clicked)
 
         table_widget = self.analiz_window.tableWidget
+        self.createTable(table_widget)
+
+
         header = table_widget.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Stretch)
 
-        pixmap = QPixmap('../ui/icon/result.png')
-        self.analiz_window.resultLabel.setPixmap(pixmap)
-        self.analiz_window.resultLabel.setScaledContents(True)
-        self.analiz_window.resultLabel.setFixedSize(364, 265)
-        # self.analiz_window.resultLabel.setSizePolicy(QSizePolicy.Prefered, QSizePolicy.Prefered)
-        self.analiz_window.resultLabel.show()
+        # pixmap = QPixmap('../ui/icon/result.png')
+        # self.analiz_window.resultLabel.setPixmap(pixmap)
+        # self.analiz_window.resultLabel.setScaledContents(True)
+        # self.analiz_window.resultLabel.setFixedSize(364, 265)
+        # # self.analiz_window.resultLabel.setSizePolicy(QSizePolicy.Prefered, QSizePolicy.Prefered)
+        # self.analiz_window.resultLabel.show()
 
         OceanViewGui.setButtonIcon(self.analiz_window.backtohomeButton, '../ui/icon/back.png')
         self.analiz_window.backtohomeButton.clicked.connect(self.on_backtohomeButton_clicked)
+
+        # fixme
+        self.analiz_window.resultLayout.setSizePolicy(QSizePolicy.Prefered, QSizePolicy.Prefered)
+        self.analiz_window.resultLayout.addWidget(self.engine.result_image())
 
     def init_tbs_window(self):
         # self.tbs_window.setFixedSize(self.w, self.h)
