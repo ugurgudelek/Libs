@@ -329,7 +329,7 @@ class OceanViewGui(QMainWindow):
         self.analiz_window.backtohomeButton.clicked.connect(self.on_backtohomeButton_clicked)
 
         # fixme
-        self.analiz_window.resultLayout.setSizePolicy(QSizePolicy.Prefered, QSizePolicy.Prefered)
+        # self.analiz_window.resultLayout.setSizePolicy(QSizePolicy.Prefered, QSizePolicy.Prefered)
         self.analiz_window.resultLayout.addWidget(self.engine.result_image())
 
     def init_tbs_window(self):
