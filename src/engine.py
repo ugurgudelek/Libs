@@ -14,6 +14,7 @@ from database import Database
 from analyzer import Analyzer
 from calibration import Calibrator
 
+
 class Engine:
     """
 
@@ -48,6 +49,38 @@ class Engine:
         self.sample_id = None
         self.readings = None
 
+        self.dev_mode = True if config.mode == 'dev' else False
+
+        self.giris_info = None
+
+    # GIRIS WINDOW METHODS
+    def set_giris_info(self, giris_info):
+
+        self.giris_info = giris_info
+
+
+    def get_loc_dir(self):
+        giris_info = self.giris_info
+        il, ilce, koy = giris_info['il'], giris_info['ilce'], giris_info['koy']
+
+        return os.path.join(self.config.sample_output_dir, il, ilce, koy)
+
+    def save_giris_info(self):
+
+        output_dir = self.get_loc_dir()
+
+        os.makedirs(output_dir, exist_ok=True)
+
+        pd.Series(self.giris_info).to_csv(os.path.join(output_dir, 'info.csv'))
+
+    # ANALIZ WINDOW METHODS
+    def set_numune_info(self, numune_info):
+        self.numune_info = numune_info
+
+    def get_sample_id(self):
+        return self.numune_info['numuneadi']
+
+
 
     def connect_to_gui(self, loc_name, sample_id):
         """
@@ -78,8 +111,6 @@ class Engine:
 
         return sample_dir_exists
 
-
-
     def load_readings(self, readings):
         self.readings = readings
 
@@ -95,6 +126,15 @@ class Engine:
             reading = self.iomanager.io_to_dataframe()
 
         return name, reading
+
+    def read_remainingrecords(self, remainingrecord):
+        self.readings = {}
+        while remainingrecord > 0:
+            name, reading = self.read_io()
+            self.readings[name] = reading
+            remainingrecord -= 1
+            yield remainingrecord
+
 
 
     def save_readings(self):
@@ -129,17 +169,16 @@ class Engine:
 
 
         # create path
-        loc_path = os.path.join(self.sample_output_dir, self.loc_name) # e.g output/Niğde
-        if not os.path.exists(loc_path):
-            os.mkdir(loc_path)
+        loc_path = self.get_loc_dir()  # e.g output/Niğde
+        sample_id = self.get_sample_id()
 
-
+        os.makedirs(loc_path, exist_ok=True)
 
         # it is time to store io readings
         for (key, reading) in self.readings.items():
-            _save_reading(loc_path=loc_path, sample_id=self.sample_id, name=key, reading=reading)
+            _save_reading(loc_path=loc_path, sample_id=sample_id, name=key, reading=reading)
 
-        return os.path.join(loc_path, str(self.sample_id))
+        return os.path.join(loc_path, sample_id)
 
     def analyze(self, dir, plotnow=False):
         # find matches
@@ -191,22 +230,23 @@ class Engine:
         # fit calibration values
         # self.calibrator.fit(calibration_df)
 
-    def plot_readings(self, readings):
-        pass
+
 
 if __name__ == '__main__':
 
     config = Config('../config.ini')
-    engine = Engine(iomanager=IOManager(),
+    engine = Engine(gui=OceanViewGui(), iomanager=IOManager(),
                     analyzer=Analyzer(config=config, database=Database(config)),
                     calibrator=Calibrator(input_dir=config.calibration_input_dir,
                                           output_dir=config.calibration_output_dir),
                     config=config)
 
-    engine.pipeline(loc_name='niğde')
-    engine.pipeline(loc_name='adana')
-    engine.pipeline(loc_name='yozgat')
-    engine.pipeline(loc_name='samsun')
+    app = QApplication(sys.argv)
+
+    widget = OceanViewGui(engine=engine, config=config)
+    widget.show()
+
+    sys.exit(app.exec_())
 
 
 
