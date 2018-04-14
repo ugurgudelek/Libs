@@ -4,6 +4,26 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# class CalibrationColumn:
+#     """
+#
+#         Args:
+#             colname(str):
+#
+#     """
+#     def __init__(self, colname):
+#
+#         parts = colname.split(' ')
+#         self.raw_name = parts[0]
+#         self.name = parts[0].lower()
+#         self.id = int(parts[1])
+#         self.nm = float(parts[-1])
+#
+#     def __str__(self):
+#         return '{el} {id} @ {nm}'.format(el=self.raw_name,
+#                                          id=self.id,
+#                                          nm=self.nm)
+
 class CalibrationColumn:
     """
 
@@ -11,8 +31,8 @@ class CalibrationColumn:
             colname(str):
 
     """
-    def __init__(self, colname):
 
+    def __init__(self, colname):
         parts = colname.split(' ')
         self.raw_name = parts[0]
         self.name = parts[0].lower()
@@ -23,6 +43,9 @@ class CalibrationColumn:
         return '{el} {id} @ {nm}'.format(el=self.raw_name,
                                          id=self.id,
                                          nm=self.nm)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 
@@ -82,7 +105,32 @@ class Calibrator:
         sheet.loc[:values.shape[0] - 1, col_names] = values  # selects up to and including
         sheet.to_excel(os.path.join(self.output_dir, '{}.xlsx'.format(sheet_name)))
 
-    def fit(self, dataframe):
+
+    def read_calibration_file(self, path=None):
+        calibration_num = 1
+        loc_name = 'adana'
+
+        calibration_csv = u'../output/calibration/{}/{}.csv'.format(calibration_num, loc_name)
+        calibration_xlsx = u'../output/calibration/{}/{}.xlsx'.format(calibration_num, loc_name)
+
+        df = pd.read_csv(open(calibration_csv, 'rb'))
+        df['sample_id'] = list(range(1, df.shape[0] + 1))
+
+        N_values = pd.read_excel(open(calibration_xlsx, 'rb'))['% Azot'].values
+        df['%N'] = N_values
+
+        elements = [CalibrationColumn(colname) for colname in df.columns[:-2]]
+
+        regplot = sns.regplot(data=df, x=str(elements[0]), y='%N', color='r', marker='+')
+
+        x = df['C 1 @ 279.408'].values
+        y = df['%N'].values
+        from scipy import stats
+        slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+
+        return (slope, intercept)
+
+    def fit(self, X):
         """
 
         Args:
@@ -91,7 +139,14 @@ class Calibrator:
         Returns:
 
         """
-        raise Exception("These files are implement in calibration_fit.ipynb")
+        # raise Exception("These files are implement in calibration_fit.ipynb")
+
+
+        # (slope, intercept) = self.read_calibration_file()
+        # return slope*X + intercept
+
+        return (X - 140) / 741.2
+
 
     def write_to_csv(self, dataframe, loc_name):
         dataframe.to_csv(os.path.join(self.output_dir, '{}.csv'.format(loc_name)), index=False)
