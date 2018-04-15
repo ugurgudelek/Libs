@@ -19,6 +19,8 @@ from PyQt5.QtWidgets import QTableWidgetItem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
+from collections import defaultdict
+
 
 class Engine:
     """
@@ -29,6 +31,7 @@ class Engine:
         calibrator(Calibrator):
         config(Config):
     """
+
     def __init__(self, iomanager, analyzer, calibrator, config):
 
         self.config = config
@@ -63,7 +66,6 @@ class Engine:
 
         self.giris_info = giris_info
 
-
     def get_loc_dir(self):
         giris_info = self.giris_info
         il, ilce, koy = giris_info['il'], giris_info['ilce'], giris_info['koy']
@@ -84,8 +86,6 @@ class Engine:
 
     def get_sample_id(self):
         return self.numune_info['numuneadi']
-
-
 
     def connect_to_gui(self, loc_name, sample_id):
         """
@@ -140,8 +140,6 @@ class Engine:
             remainingrecord -= 1
             yield remainingrecord
 
-
-
     def save_readings(self):
         """
 
@@ -172,7 +170,6 @@ class Engine:
 
             reading.to_csv(os.path.join(sample_path, '{}.csv'.format(name)), index=False)
 
-
         # create path
         loc_path = self.get_loc_dir()  # e.g output/Niğde
         sample_id = self.get_sample_id()
@@ -193,7 +190,6 @@ class Engine:
             # Plot
             fig, ax = plt.subplots()
 
-
             self.analyzer.plot_data(ax, point_peaks=True, draw_verticals=False)
             self.analyzer.plot_matches(ax)
 
@@ -204,7 +200,6 @@ class Engine:
 
     def calibrate(self, matches):
         return self.calibrator.search_in_matches(matches=matches, epsilon=self.calibration_epsilon)
-
 
     def pipeline(self, loc_name):
         sample_path = os.path.join(self.sample_output_dir, loc_name)
@@ -224,7 +219,7 @@ class Engine:
             calibration_df = calibration_df.append(pd.Series(found_el_intensity_matches),
                                                    ignore_index=True)
 
-         # write all calibration data to new excel file.
+        # write all calibration data to new excel file.
         self.calibrator.write_to_excel(sheet_name=loc_name,
                                        col_names=calibration_df.columns,
                                        values=calibration_df.values)
@@ -235,9 +230,8 @@ class Engine:
         # fit calibration values
         # self.calibrator.fit(calibration_df)
 
-
-    def fit(self, X):
-        return self.calibrator.fit(X)
+    def fit(self, X, name):
+        return self.calibrator.fit(X, name)
 
     def data_to_row(self, table, numuneadi, element, miktar, birim, durumu):
         current_row = table.rowCount()
@@ -248,37 +242,64 @@ class Engine:
         table.setItem(current_row, 3, QTableWidgetItem(birim))
         table.setItem(current_row, 4, QTableWidgetItem(durumu))
 
+    def limit_values(self, element, quantity):
+        # çok az, az, yeterli, fazla, çok fazla
+        limit_db = defaultdict(list)
+        limit_db['N'] = [0.045, 0.09, 0.17, 0.32]
+        limit_db['P2O5'] = [1.43, 4.58, 14.31, 45.8]
+        limit_db['K2O'] = [15.33, 33.03, 87.30, 302.01]
+        limit_db['OM'] = [1, 2, 3, 4]
 
-    def result_image(self):
+        arr = limit_db[element]
+
+        def find_interval(arr, q):
+            for i,val in enumerate(arr):
+                if q < val:
+                    return i
+            return 4 # last index
+
+        int_to_quantityword = {0:'çok az', 1:'az', 2:'yeterli', 3:'fazla', 4:'çok fazla'}
+
+        return int_to_quantityword[find_interval(arr, quantity)]
+
+    def analysis_to_ppm_data(self, matches):
+
+        elements = ['N 5 @ 443.506',
+                    'P 4 @ 407.871',
+                    'C 2 @ 280.146',
+                    'K 2 @ 553.656']
+        names = ['N', 'P2O5', 'OM', 'K2O']
+        Xs = [self.fit(matches[element], name) for element, name in zip(elements, names)]
+
+        # ppm to kgda conversion
+        multipliers = [1, 2.29 * 0.25, 1.724, 1.21 * 0.25]
+        quantities = ['{:.2f}'.format(mul*X) for mul, X in zip(multipliers, Xs)]
+        units = ['%', 'kg/da', '%', 'kg/da']
+        statuses = [self.limit_values(name, X) for name, X in zip(names, Xs)]
+
+        return names, quantities, statuses, units
+
+    def result_image(self, dataframe=None):
         # todo: implement
-        df = pd.DataFrame()
-        df['x'] = ['N', 'O.M', 'P2O5', 'K2O']
-        df['y'] = [10,20,30,40]
+
+        if dataframe is None:
+            dataframe = pd.DataFrame()
+            dataframe['x'] = ['N', 'OM', 'P2O5', 'K2O']
+            dataframe['y'] = [10, 20, 30, 40]
 
         plt.figure()
-        ax = sns.barplot(x='x', y='y', data=df)
+        ax = sns.barplot(x='x', y='y', data=dataframe)
         canvas = FigureCanvas(ax.figure)
 
         return canvas
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     config = Config('../config.ini')
-    engine = Engine(gui=OceanViewGui(), iomanager=IOManager(),
+    engine = Engine(iomanager=IOManager(),
                     analyzer=Analyzer(config=config, database=Database(config)),
                     calibrator=Calibrator(input_dir=config.calibration_input_dir,
                                           output_dir=config.calibration_output_dir),
                     config=config)
 
-    app = QApplication(sys.argv)
-
-    widget = OceanViewGui(engine=engine, config=config)
-    widget.show()
-
-    sys.exit(app.exec_())
-
-
-
-
-
-
+    engine.pipeline('adana')

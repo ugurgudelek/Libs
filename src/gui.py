@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtCore import pyqtSlot, Qt, QRect, QDateTime
+from PyQt5.QtCore import pyqtSlot, Qt, QRect, QDateTime, QUrl
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QDialog, QPushButton, QSpinBox, QMessageBox, QLineEdit, QMainWindow, \
     QGraphicsView, QLabel, QStyle, QSizePolicy, QWidget, QTableWidgetItem, QHeaderView, QComboBox, QDateTimeEdit
@@ -7,12 +7,17 @@ from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon, QPen, QPixmap
 
+
+from PyQt5 import QtWebEngineWidgets
+
 from iomanager import IOManager
 from analyzer import Analyzer, Database, Sample
 from config import Config
 from engine import Engine
 from util import subplot
 from calibration import Calibrator
+
+import pandas as pd
 
 
 class OceanViewGui(QMainWindow):
@@ -170,7 +175,13 @@ class OceanViewGui(QMainWindow):
         loadUi('../ui/giris_window.ui', self.giris_window)
         self.giris_window.setWindowTitle('Giriş')
 
-        self.giris_window.uruntipiCB.addItems(['Bitkisel Ürün'])
+        self.giris_window.uruntipiCB.addItems(['Buğday', 'Arpa', 'Mısır', 'Çeltik',
+                                               'A.çiçeği', 'Patates','Ş.pancarı','Bağ',
+                                               'Meyve','Sebze','Yonca','Kavak',
+                                               'Bostan','Kuru soğan','Sarımsak','K.Fasulye',
+                                               'Nohut','Mercimek','Macar Fiğ', 'Yaygın Fiğ',
+                                               'Korunga','Kanola','Haşhaş','Havuç',
+                                               'Kimyon','Susam'])
         self.giris_window.tarimsekliCB.addItems(['Kuru', 'Sulu'])
         self.giris_window.derinlikCB.addItems(['0-30 cm', '30-60 cm', '60-90 cm', '90-120 cm'])
 
@@ -260,23 +271,30 @@ class OceanViewGui(QMainWindow):
         # match elements in calibration excel with peak values.
         found_el_intensity_matches = self.engine.calibrate(matches=matches)
 
-        # todo: read calibration file
+        # done: read calibration file
 
         # done: implement fit calibration
 
-        numuneadi = self.engine.numune_info['numuneadi']
-        element = 'N 5 @ 443.506'
-        X = self.engine.fit(found_el_intensity_matches[element])
-        miktar = str(X)
-        birim = self.engine.numune_info['birim']
-        durumu = 'NA'
+        # numuneadi = self.engine.numune_info['numuneadi']
+        # element = 'N 5 @ 443.506'
+        # X = self.engine.fit(found_el_intensity_matches[element])
+        # miktar = '{:.2f}'.format(X)
+        # birim = self.engine.numune_info['birim']
+        # durumu = self.engine.limit_values('N', X)
+
+        (names, quantities, statuses, units) = self.engine.analysis_to_ppm_data(found_el_intensity_matches)
 
         self.analiz_window.progressLabel.setText('Bilgiler işleniyor...')
         # done: fill table
-        self.engine.data_to_row(self.analiz_window.tableWidget, numuneadi, element, miktar, birim, durumu)
+        numuneadi = self.engine.numune_info['numuneadi']
+        for name,quantity,status, unit in zip(names, quantities, statuses, units):
+            self.engine.data_to_row(self.analiz_window.tableWidget, numuneadi, name, quantity, unit, status)
 
         # todo: show results
-        widget = self.engine.result_image()
+        df = pd.DataFrame()
+        df['x'] = ['N', 'OM', 'P2O5', 'K2O']
+        df['y'] = [10, 20, 30, 40]
+        widget = self.engine.result_image(df)
         widget.setFixedSize(200, 200)
         self.analiz_window.resultLayout.itemAt(0).widget().setParent(None)
         self.analiz_window.resultLayout.addWidget(widget)
@@ -328,6 +346,11 @@ class OceanViewGui(QMainWindow):
 
         OceanViewGui.setButtonIcon(self.tbs_window.backtohomeButton, '../ui/icon/back.png')
         self.tbs_window.backtohomeButton.clicked.connect(self.on_backtohomeButton_clicked)
+
+        webView = QtWebEngineWidgets.QWebEngineView(self.tbs_window.webWidget)
+        webView.setUrl(QtCore.QUrl("https://tbs.tarbil.gov.tr/Authentication.aspx"))
+        webView.setObjectName("webView")
+
 
 
 if __name__ == '__main__':
