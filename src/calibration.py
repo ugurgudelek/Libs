@@ -130,7 +130,7 @@ class Calibrator:
 
         return (slope, intercept)
 
-    def fit(self, X):
+    def fit(self, X, name):
         """
 
         Args:
@@ -145,8 +145,21 @@ class Calibrator:
         # (slope, intercept) = self.read_calibration_file()
         # return slope*X + intercept
 
-        return (X - 140) / 741.2
+        # return (X - 140) / 741.2
 
+        # ['N', 'P2O5', 'OM', 'K2O']
+
+        if name == 'N':
+            return (X - 85.75) / 3922.9
+
+        if name == 'P2O5':
+            return (X - 47.88) / 0.1895
+
+        if name == 'OM':
+            return (X - 85.75) / 3922.9
+
+        if name == 'K2O':
+            return (X - 564.17) / (3.1544)
 
     def write_to_csv(self, dataframe, loc_name):
         dataframe.to_csv(os.path.join(self.output_dir, '{}.csv'.format(loc_name)), index=False)
