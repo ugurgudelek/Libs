@@ -6,29 +6,47 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>781</width>
-    <height>707</height>
+    <width>724</width>
+    <height>472</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="4" column="3">
-    <widget class="QPushButton" name="analyzeButton">
+   <item row="4" column="2" colspan="2">
+    <widget class="QTableWidget" name="tableWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="text">
-      <string>Analizi Başlat</string>
+     <property name="rowCount">
+      <number>0</number>
+     </property>
+     <property name="columnCount">
+      <number>0</number>
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
+   <item row="1" column="0">
     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="spacing">
+      <number>10</number>
+     </property>
+     <property name="leftMargin">
+      <number>10</number>
+     </property>
+     <property name="topMargin">
+      <number>10</number>
+     </property>
+     <property name="rightMargin">
+      <number>10</number>
+     </property>
+     <property name="bottomMargin">
+      <number>10</number>
+     </property>
      <item>
       <widget class="QLabel" name="label">
        <property name="font">
@@ -65,33 +83,48 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Kalan Atış Sayısı</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
-   <item row="0" column="0" colspan="4">
-    <widget class="QLabel" name="label_5">
+   <item row="4" column="0">
+    <layout class="QHBoxLayout" name="resultLayout"/>
+   </item>
+   <item row="5" column="3">
+    <widget class="QPushButton" name="backtohomeButton">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
      <property name="text">
-      <string>ANALİZ</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <string>Geri</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="1" column="2" colspan="2">
     <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>10</number>
+     </property>
+     <property name="leftMargin">
+      <number>10</number>
+     </property>
+     <property name="topMargin">
+      <number>10</number>
+     </property>
+     <property name="rightMargin">
+      <number>10</number>
+     </property>
+     <property name="bottomMargin">
+      <number>10</number>
+     </property>
      <item>
       <widget class="QLineEdit" name="numuneadiLE">
        <property name="sizePolicy">
@@ -115,10 +148,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QLineEdit" name="remainingrecordLE"/>
+     </item>
     </layout>
    </item>
-   <item row="8" column="3">
-    <widget class="QPushButton" name="backtohomeButton">
+   <item row="5" column="2">
+    <widget class="QPushButton" name="analyzeButton">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -126,11 +162,11 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Geri</string>
+      <string>Analizi Başlat</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="4">
+   <item row="2" column="2" colspan="2">
     <widget class="QLabel" name="label_4">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -153,38 +189,35 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0" colspan="4">
-    <widget class="QTableWidget" name="tableWidget">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_5">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="rowCount">
-      <number>0</number>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
-     <property name="columnCount">
-      <number>0</number>
+     <property name="text">
+      <string>ANALİZ</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
-   <item row="4" column="2">
-    <layout class="QVBoxLayout" name="verticalLayout_3">
-     <item>
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Kalan Atış Sayısı</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="remainingrecordLE"/>
-     </item>
-    </layout>
-   </item>
-   <item row="8" column="0" colspan="2">
-    <layout class="QHBoxLayout" name="resultLayout"/>
+   <item row="5" column="0">
+    <widget class="QLabel" name="progressLabel">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -192,10 +225,6 @@
   <tabstop>numuneadiLE</tabstop>
   <tabstop>howmanyrecordSpinBox</tabstop>
   <tabstop>birimCB</tabstop>
-  <tabstop>analyzeButton</tabstop>
-  <tabstop>backtohomeButton</tabstop>
-  <tabstop>tableWidget</tabstop>
-  <tabstop>remainingrecordLE</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -1,8 +1,8 @@
 import sys
-from PyQt5.QtCore import pyqtSlot, Qt, QRect
+from PyQt5.QtCore import pyqtSlot, Qt, QRect, QDateTime
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QDialog, QPushButton, QSpinBox, QMessageBox, QLineEdit, QMainWindow, \
-    QGraphicsView, QLabel, QStyle, QSizePolicy, QWidget, QTableWidgetItem, QHeaderView, QComboBox
+    QGraphicsView, QLabel, QStyle, QSizePolicy, QWidget, QTableWidgetItem, QHeaderView, QComboBox, QDateTimeEdit
 from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon, QPen, QPixmap
@@ -15,18 +15,12 @@ from util import subplot
 from calibration import Calibrator
 
 
-
-import pandas as pd
-import os
-
-
 class OceanViewGui(QMainWindow):
     def __init__(self, engine, config):
         super(OceanViewGui, self).__init__()
 
         self.engine = engine
         self.config = config
-
 
         self.giris_window = QWidget()
         self.analiz_window = QWidget()
@@ -51,38 +45,6 @@ class OceanViewGui(QMainWindow):
         self.analiz_window.remainingrecordLE.setText(str(value))
         QtWidgets.qApp.processEvents()
 
-    # def init_ui(self):
-    #
-    #     self.locnameLineEdit = QLineEdit()
-    #     self.sampleIDSpinBox = QSpinBox()
-    #     self.howmanyrecordSpinBox = QSpinBox()
-    #
-    #     self.remainingrecordLineEdit = QLineEdit()
-    #
-    #     self.readIOButton = QPushButton()
-    #
-    #     loadUi('../ui/oceanview_mainw.ui', self)
-    #     self.setWindowTitle('OceanView')
-    #
-    #     self.setWindowIcon(QIcon('../input/image.png'))
-    #     pixmap = QPixmap('../input/image.png')
-    #     self.testlabel.setPixmap(pixmap)
-    #     self.testlabel.setScaledContents(True)
-    #     self.testlabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-    #     self.testlabel.show()
-    #
-    #     #  initializations
-    #     self.howmanyrecordSpinBox.setValue(10)
-    #     self.remainingrecord = self.howmanyrecordSpinBox.value()
-    #
-    #     # connect events
-    #     self.howmanyrecordSpinBox.valueChanged.connect(self.on_howmanyrecordSpinBox_valueChanged)
-    #     self.readIOButton.clicked.connect(self.onreadIOButton_clicked)
-
-    ####################################
-    #             EVENTS               #
-    ####################################
-
     @pyqtSlot()
     def on_howmanyrecordSpinBox_valueChanged(self):
         self.remainingrecord = self.analiz_window.howmanyrecordSpinBox.value()
@@ -99,7 +61,7 @@ class OceanViewGui(QMainWindow):
         if sample_dir_already_exists:
             choice = QMessageBox.question(self,
                                           'Sample directory', 'Sample dir already exists. \n'
-                                                                   'Do you want to continue?',
+                                                              'Do you want to continue?',
                                           QMessageBox.Yes | QMessageBox.No)
             if choice == QMessageBox.No:
                 start_reading = False
@@ -113,13 +75,13 @@ class OceanViewGui(QMainWindow):
 
             engine.load_readings(readings=readings)
 
-
             # Save readings
             choice = QMessageBox.question(self,
                                           'Record',
                                           'Recording Finished!\n'
                                           'Recordings are saved to\n'
-                                          'output/samples/{loc_name}/{sample_id}'.format(loc_name=loc_name, sample_id=sample_id),
+                                          'output/samples/{loc_name}/{sample_id}'.format(loc_name=loc_name,
+                                                                                         sample_id=sample_id),
                                           QMessageBox.Ok)
 
             dir = engine.save_readings()
@@ -140,9 +102,6 @@ class OceanViewGui(QMainWindow):
         # reset for next record
         self.remainingrecord = self.howmanyrecordSpinBox.value()
 
-
-
-
     @pyqtSlot()
     def on_backtohomeButton_clicked(self):
         self.giris_window.hide()
@@ -157,7 +116,6 @@ class OceanViewGui(QMainWindow):
         tableWidget.setColumnCount(5)
         tableWidget.setHorizontalHeaderLabels(['Numune Adı', 'Element', 'Miktar', 'Birim', 'Durumu'])
 
-
     def assign_triggers(self):
         self.girisButton.clicked.connect(self.on_girisButton_clicked)
         self.analizButton.clicked.connect(self.on_analizButton_clicked)
@@ -170,8 +128,11 @@ class OceanViewGui(QMainWindow):
 
     @pyqtSlot()
     def on_analizButton_clicked(self):
-        self.hide()
-        self.analiz_window.show()
+        if self.engine.giris_info is None:
+            self.show_save_popup('Lütfen giriş sayfasındaki bilgileri doldurun.')
+        else:
+            self.hide()
+            self.analiz_window.show()
 
     @pyqtSlot()
     def on_tarimsalbilgisistemiButton_clicked(self):
@@ -190,6 +151,7 @@ class OceanViewGui(QMainWindow):
         self.girisButton = QPushButton()
         self.analizButton = QPushButton()
         self.tarimsalbilgisistemiButton = QPushButton()
+        self.dateTimeEdit = QDateTimeEdit()
 
         loadUi('../ui/mainw.ui', self)
         self.setWindowTitle('OceanView')
@@ -201,6 +163,8 @@ class OceanViewGui(QMainWindow):
         OceanViewGui.setButtonIcon(self.analizButton, '../ui/icon/analytics.png')
         OceanViewGui.setButtonIcon(self.tarimsalbilgisistemiButton, '../ui/icon/fertilizer.png')
 
+        self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())
+
     def init_giris_window(self):
         # self.giris_window.setFixedSize(self.w, self.h)
         loadUi('../ui/giris_window.ui', self.giris_window)
@@ -211,15 +175,17 @@ class OceanViewGui(QMainWindow):
         self.giris_window.derinlikCB.addItems(['0-30 cm', '30-60 cm', '60-90 cm', '90-120 cm'])
 
         OceanViewGui.setButtonIcon(self.giris_window.backtohomeButton, '../ui/icon/back.png')
+        OceanViewGui.setButtonIcon(self.giris_window.analizWindowButton, '../ui/icon/analytics.png')
+        OceanViewGui.setButtonIcon(self.giris_window.saveButton, '../ui/icon/save.png')
         self.giris_window.backtohomeButton.clicked.connect(self.on_backtohomeButton_clicked)
+        self.giris_window.analizWindowButton.clicked.connect(self.on_analizButton_clicked)
 
         self.giris_window.saveButton.clicked.connect(self.on_saveButton_clicked)
 
     def show_save_popup(self, text):
         QMessageBox.question(self, 'Bilgi', text, QMessageBox.Ok)
 
-    @pyqtSlot()
-    def on_saveButton_clicked(self):
+    def read_giriswindow_field(self):
         il = self.giris_window.ilLE.text()
         ilce = self.giris_window.ilceLE.text()
         koy = self.giris_window.koyLE.text()
@@ -229,22 +195,41 @@ class OceanViewGui(QMainWindow):
         tarimsekli = self.giris_window.tarimsekliCB.currentText()
         derinlik = self.giris_window.derinlikCB.currentText()
 
-        giris_info = dict(il=il,
-                               ilce=ilce,
-                               koy=koy,
-                               adaparsel=adaparsel,
-                               uruntipi=uruntipi,
-                               tarimsekli=tarimsekli,
-                               derinlik=derinlik)
+        return (il, ilce, koy, adaparsel, uruntipi, tarimsekli, derinlik)
 
-        self.engine.set_giris_info(giris_info)
-        self.engine.save_giris_info()
+    def are_fields_empty(self, field_values):
+        for value in field_values:
+            if len(value) == 0:
+                return True
+        return False
 
-        # todo: show saved popup.
-        self.show_save_popup('Arazi bilgileri kaydedildi.')
+    @pyqtSlot()
+    def on_saveButton_clicked(self):
+
+        (il, ilce, koy, adaparsel, uruntipi, tarimsekli, derinlik) = self.read_giriswindow_field()
+
+        # check for empty fields
+        if self.are_fields_empty((il, ilce, koy, adaparsel, uruntipi, tarimsekli, derinlik)):
+            self.show_save_popup('Lütfen bilgileri eksiksiz doldurunuz.')
+
+        else:
+            giris_info = dict(il=il,
+                              ilce=ilce,
+                              koy=koy,
+                              adaparsel=adaparsel,
+                              uruntipi=uruntipi,
+                              tarimsekli=tarimsekli,
+                              derinlik=derinlik)
+
+            self.engine.set_giris_info(giris_info)
+            self.engine.save_giris_info()
+
+            # done: show saved popup.
+            self.show_save_popup('Arazi bilgileri kaydedildi.')
 
     @pyqtSlot()
     def on_analyzeButton_clicked(self):
+        self.analiz_window.progressLabel.setText('Hazır.')
         numuneadi = self.analiz_window.numuneadiLE.text()
         lazeratissayisi = self.analiz_window.howmanyrecordSpinBox.value()
         birim = self.analiz_window.birimCB.currentText()
@@ -255,24 +240,25 @@ class OceanViewGui(QMainWindow):
 
         self.engine.set_numune_info(numune_info)
 
-
+        self.analiz_window.progressLabel.setText('Cihazdan okuma yapılıyor...')
         # to update remainingrecord, I need to create a generator
         for self.remainingrecord in self.engine.read_remainingrecords(self.remainingrecord):
             readings = self.engine.readings
 
-
-
+        self.analiz_window.progressLabel.setText('Veriler kaydediliyor...')
         dir = self.engine.save_readings()
 
         # show saved popup
         self.show_save_popup('Atışlar kaydedildi.\nAnalize devam edilecek.')
 
+        self.analiz_window.progressLabel.setText('Analiz yapılıyor...')
+        QtWidgets.qApp.processEvents()
         # analyze and show peaks and its neighbours
         (sample, matches) = self.engine.analyze(dir=dir, plotnow=True)
 
+        self.analiz_window.progressLabel.setText('Kalibrasyon verisi işleniyor...')
         # match elements in calibration excel with peak values.
         found_el_intensity_matches = self.engine.calibrate(matches=matches)
-
 
         # todo: read calibration file
 
@@ -285,16 +271,20 @@ class OceanViewGui(QMainWindow):
         birim = self.engine.numune_info['birim']
         durumu = 'NA'
 
+        self.analiz_window.progressLabel.setText('Bilgiler işleniyor...')
         # done: fill table
         self.engine.data_to_row(self.analiz_window.tableWidget, numuneadi, element, miktar, birim, durumu)
 
         # todo: show results
-        self.engine.result_image()
+        widget = self.engine.result_image()
+        widget.setFixedSize(200, 200)
+        self.analiz_window.resultLayout.itemAt(0).widget().setParent(None)
+        self.analiz_window.resultLayout.addWidget(widget)
 
         # reset remainingrecord
         self.remainingrecord = self.analiz_window.howmanyrecordSpinBox.value()
 
-
+        self.analiz_window.progressLabel.setText('Hazır.')
 
     def init_analiz_window(self):
         # self.analiz_window.setFixedSize(self.w, self.h)
@@ -314,7 +304,6 @@ class OceanViewGui(QMainWindow):
         table_widget = self.analiz_window.tableWidget
         self.createTable(table_widget)
 
-
         header = table_widget.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Stretch)
 
@@ -328,9 +317,9 @@ class OceanViewGui(QMainWindow):
         OceanViewGui.setButtonIcon(self.analiz_window.backtohomeButton, '../ui/icon/back.png')
         self.analiz_window.backtohomeButton.clicked.connect(self.on_backtohomeButton_clicked)
 
-        # fixme
-        # self.analiz_window.resultLayout.setSizePolicy(QSizePolicy.Prefered, QSizePolicy.Prefered)
-        self.analiz_window.resultLayout.addWidget(self.engine.result_image())
+        widget = self.engine.result_image()
+        widget.setFixedSize(200, 200)
+        self.analiz_window.resultLayout.addWidget(widget)
 
     def init_tbs_window(self):
         # self.tbs_window.setFixedSize(self.w, self.h)
@@ -340,8 +329,8 @@ class OceanViewGui(QMainWindow):
         OceanViewGui.setButtonIcon(self.tbs_window.backtohomeButton, '../ui/icon/back.png')
         self.tbs_window.backtohomeButton.clicked.connect(self.on_backtohomeButton_clicked)
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     config = Config('../config.ini')
     engine = Engine(iomanager=IOManager(),
                     analyzer=Analyzer(config=config, database=Database(config)),

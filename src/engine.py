@@ -250,12 +250,13 @@ class Engine:
 
 
     def result_image(self):
+        # todo: implement
         df = pd.DataFrame()
         df['x'] = ['N', 'O.M', 'P2O5', 'K2O']
         df['y'] = [10,20,30,40]
 
-        fig, ax = plt.subplots(figsize=(100, 100))
-        ax = sns.barplot(x='x', y='y', data=df, ax=ax)
+        plt.figure()
+        ax = sns.barplot(x='x', y='y', data=df)
         canvas = FigureCanvas(ax.figure)
 
         return canvas
