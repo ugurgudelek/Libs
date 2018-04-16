@@ -72,18 +72,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Birim</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="label_6">
        <property name="text">
         <string>Kalan Atış Sayısı</string>
@@ -137,16 +125,6 @@
      </item>
      <item>
       <widget class="QSpinBox" name="howmanyrecordSpinBox"/>
-     </item>
-     <item>
-      <widget class="QComboBox" name="birimCB">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="QLineEdit" name="remainingrecordLE"/>
@@ -224,7 +202,6 @@
  <tabstops>
   <tabstop>numuneadiLE</tabstop>
   <tabstop>howmanyrecordSpinBox</tabstop>
-  <tabstop>birimCB</tabstop>
  </tabstops>
  <resources/>
  <connections/>

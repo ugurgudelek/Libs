@@ -243,11 +243,9 @@ class OceanViewGui(QMainWindow):
         self.analiz_window.progressLabel.setText('Hazır.')
         numuneadi = self.analiz_window.numuneadiLE.text()
         lazeratissayisi = self.analiz_window.howmanyrecordSpinBox.value()
-        birim = self.analiz_window.birimCB.currentText()
 
         numune_info = dict(numuneadi=numuneadi,
-                           lazeratissayisi=lazeratissayisi,
-                           birim=birim)
+                           lazeratissayisi=lazeratissayisi)
 
         self.engine.set_numune_info(numune_info)
 
@@ -314,7 +312,7 @@ class OceanViewGui(QMainWindow):
         self.analiz_window.howmanyrecordSpinBox.setValue(10)
         self.remainingrecord = self.analiz_window.howmanyrecordSpinBox.value()
 
-        self.analiz_window.birimCB.addItems(['%', 'ppm', 'kg/da'])
+
 
         OceanViewGui.setButtonIcon(self.analiz_window.analyzeButton, '../ui/icon/play-button.png')
         self.analiz_window.analyzeButton.clicked.connect(self.on_analyzeButton_clicked)
