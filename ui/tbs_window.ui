@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>952</width>
-    <height>896</height>
+    <height>695</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,8 +22,8 @@
   <widget class="QPushButton" name="backtohomeButton">
    <property name="geometry">
     <rect>
-     <x>863</x>
-     <y>807</y>
+     <x>860</x>
+     <y>610</y>
      <width>80</width>
      <height>80</height>
     </rect>
@@ -50,7 +50,7 @@
      <x>9</x>
      <y>9</y>
      <width>934</width>
-     <height>221</height>
+     <height>161</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -89,7 +89,7 @@ QGroupBox::title {
       <x>17</x>
       <y>32</y>
       <width>674</width>
-      <height>171</height>
+      <height>121</height>
      </rect>
     </property>
     <property name="font">
@@ -199,7 +199,7 @@ QGroupBox::title {
       <x>706</x>
       <y>32</y>
       <width>177</width>
-      <height>171</height>
+      <height>121</height>
      </rect>
     </property>
     <property name="font">
@@ -247,9 +247,9 @@ QGroupBox::title {
    <property name="geometry">
     <rect>
      <x>9</x>
-     <y>250</y>
-     <width>931</width>
-     <height>551</height>
+     <y>175</y>
+     <width>801</width>
+     <height>511</height>
     </rect>
    </property>
    <property name="sizePolicy">
