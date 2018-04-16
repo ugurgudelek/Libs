@@ -356,7 +356,8 @@ if __name__ == '__main__':
     engine = Engine(iomanager=IOManager(),
                     analyzer=Analyzer(config=config, database=Database(config)),
                     calibrator=Calibrator(input_dir=config.calibration_input_dir,
-                                          output_dir=config.calibration_output_dir),
+                                          output_dir=config.calibration_output_dir,
+                                          calibration_eqns=config.calibration_equation),
                     config=config)
 
     app = QApplication(sys.argv)
