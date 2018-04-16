@@ -35,3 +35,15 @@ class Config:
 
         self.element_mapping = {elementname: c.get('ElementMapping', elementname).split(',') for elementname in
                                 c.options('ElementMapping')}
+
+        self.calibration_equation = dict()
+        for eqn_tag,eqn in c['Equations'].items():
+            slope = float(eqn.split('x')[0])
+            intercept = float(eqn.split('+')[-1].strip())
+
+            self.calibration_equation[eqn_tag] = (slope, intercept)
+
+
+
+if __name__ == "__main__":
+    config = Config('../config.ini')

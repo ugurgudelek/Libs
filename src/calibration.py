@@ -56,9 +56,10 @@ class Calibrator:
             # todo: not necessary to loop req_elements ??
             Assumes all calibration elements are same
     """
-    def __init__(self, input_dir, output_dir):
+    def __init__(self, input_dir, output_dir, calibration_eqns):
         self.input_dir = input_dir
         self.output_dir = output_dir
+        self.calibration_eqns = calibration_eqns
 
         filename = os.listdir(self.input_dir)[0]
         self.xlsx = pd.ExcelFile(os.path.join(self.input_dir, filename))
@@ -149,17 +150,21 @@ class Calibrator:
 
         # ['N', 'P2O5', 'OM', 'K2O']
 
-        if name == 'N':
-            return (X - 85.75) / 3922.9
+        name = name.lower()
+        slope,intercept = self.calibration_eqns[name]
 
-        if name == 'P2O5':
-            return (X - 47.88) / 0.1895
-
-        if name == 'OM':
-            return (X - 85.75) / 3922.9
-
-        if name == 'K2O':
-            return (X - 564.17) / (3.1544)
+        return (X-intercept) / slope
+        # if name == 'N':
+        #     return (X - 85.75) / 3922.9
+        #
+        # if name == 'P2O5':
+        #     return (X - 47.88) / 0.1895
+        #
+        # if name == 'OM':
+        #     return (X - 85.75) / 3922.9
+        #
+        # if name == 'K2O':
+        #     return (X - 564.17) / (3.1544)
 
     def write_to_csv(self, dataframe, loc_name):
         dataframe.to_csv(os.path.join(self.output_dir, '{}.csv'.format(loc_name)), index=False)
