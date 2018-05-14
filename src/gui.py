@@ -117,9 +117,10 @@ class OceanViewGui(QMainWindow):
     @staticmethod
     def createTable(tableWidget):
         # Create table
-        tableWidget.setRowCount(0)
-        tableWidget.setColumnCount(5)
-        tableWidget.setHorizontalHeaderLabels(['Numune Adı', 'Element', 'Miktar', 'Birim', 'Durumu'])
+        # tableWidget.setRowCount(0)
+        # tableWidget.setColumnCount(5)
+        # tableWidget.setHorizontalHeaderLabels(['Numune Adı', 'Element', 'Miktar', 'Birim', 'Durumu'])
+        pass
 
     def assign_triggers(self):
         self.girisButton.clicked.connect(self.on_girisButton_clicked)

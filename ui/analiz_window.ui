@@ -14,19 +14,16 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="4" column="2" colspan="2">
-    <widget class="QTableWidget" name="tableWidget">
+   <item row="5" column="3">
+    <widget class="QPushButton" name="backtohomeButton">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="rowCount">
-      <number>0</number>
-     </property>
-     <property name="columnCount">
-      <number>0</number>
+     <property name="text">
+      <string>Geri</string>
      </property>
     </widget>
    </item>
@@ -83,8 +80,54 @@
    <item row="4" column="0">
     <layout class="QHBoxLayout" name="resultLayout"/>
    </item>
-   <item row="5" column="3">
-    <widget class="QPushButton" name="backtohomeButton">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>ANALİZ</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" colspan="2">
+    <widget class="QLabel" name="label_4">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>GÜBRE TAVSİYE TABLOSU</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="QPushButton" name="analyzeButton">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -92,7 +135,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Geri</string>
+      <string>Analizi Başlat</string>
      </property>
     </widget>
    </item>
@@ -131,70 +174,172 @@
      </item>
     </layout>
    </item>
-   <item row="5" column="2">
-    <widget class="QPushButton" name="analyzeButton">
+   <item row="5" column="0">
+    <widget class="QLabel" name="progressLabel">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2" colspan="2">
+    <widget class="QTableWidget" name="tableWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="text">
-      <string>Analizi Başlat</string>
+     <property name="rowCount">
+      <number>4</number>
      </property>
-    </widget>
-   </item>
-   <item row="2" column="2" colspan="2">
-    <widget class="QLabel" name="label_4">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+     <property name="columnCount">
+      <number>5</number>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>GÜBRE TAVSİYE TABLOSU</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label_5">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>ANALİZ</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="progressLabel">
-     <property name="text">
-      <string/>
-     </property>
+     <row>
+      <property name="text">
+       <string>1</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>2</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>3</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>4</string>
+      </property>
+     </row>
+     <column>
+      <property name="text">
+       <string>Numune Adı</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Element</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Miktar</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Birim</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Durumu</string>
+      </property>
+     </column>
+     <item row="0" column="0">
+      <property name="text">
+       <string>Toprak</string>
+      </property>
+     </item>
+     <item row="0" column="1">
+      <property name="text">
+       <string>N</string>
+      </property>
+     </item>
+     <item row="0" column="2">
+      <property name="text">
+       <string>0.073</string>
+      </property>
+     </item>
+     <item row="0" column="3">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </item>
+     <item row="0" column="4">
+      <property name="text">
+       <string>Az</string>
+      </property>
+     </item>
+     <item row="1" column="0">
+      <property name="text">
+       <string>Toprak</string>
+      </property>
+     </item>
+     <item row="1" column="1">
+      <property name="text">
+       <string>P205</string>
+      </property>
+     </item>
+     <item row="1" column="2">
+      <property name="text">
+       <string>3.01</string>
+      </property>
+     </item>
+     <item row="1" column="3">
+      <property name="text">
+       <string>kg/da</string>
+      </property>
+     </item>
+     <item row="1" column="4">
+      <property name="text">
+       <string>Az</string>
+      </property>
+     </item>
+     <item row="2" column="0">
+      <property name="text">
+       <string>Toprak</string>
+      </property>
+     </item>
+     <item row="2" column="1">
+      <property name="text">
+       <string>K2O</string>
+      </property>
+     </item>
+     <item row="2" column="2">
+      <property name="text">
+       <string>40.91</string>
+      </property>
+     </item>
+     <item row="2" column="3">
+      <property name="text">
+       <string>kg/da</string>
+      </property>
+     </item>
+     <item row="2" column="4">
+      <property name="text">
+       <string>Yeterli</string>
+      </property>
+     </item>
+     <item row="3" column="0">
+      <property name="text">
+       <string>Toprak</string>
+      </property>
+     </item>
+     <item row="3" column="1">
+      <property name="text">
+       <string>OM</string>
+      </property>
+     </item>
+     <item row="3" column="2">
+      <property name="text">
+       <string>2.76</string>
+      </property>
+     </item>
+     <item row="3" column="3">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </item>
+     <item row="3" column="4">
+      <property name="text">
+       <string>Orta</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>
