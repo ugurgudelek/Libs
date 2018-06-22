@@ -117,10 +117,9 @@ class OceanViewGui(QMainWindow):
     @staticmethod
     def createTable(tableWidget):
         # Create table
-        # tableWidget.setRowCount(0)
-        # tableWidget.setColumnCount(5)
-        # tableWidget.setHorizontalHeaderLabels(['Numune Adı', 'Element', 'Miktar', 'Birim', 'Durumu'])
-        pass
+        tableWidget.setRowCount(0)
+        tableWidget.setColumnCount(5)
+        tableWidget.setHorizontalHeaderLabels(['Numune Adı', 'Element', 'Miktar', 'Birim', 'Durumu'])
 
     def assign_triggers(self):
         self.girisButton.clicked.connect(self.on_girisButton_clicked)
@@ -358,7 +357,7 @@ if __name__ == '__main__':
                     analyzer=Analyzer(config=config, database=Database(config)),
                     calibrator=Calibrator(input_dir=config.calibration_input_dir,
                                           output_dir=config.calibration_output_dir,
-                                          calibration_eqns=config.calibration_equation),
+										  calibration_eqns=config.calibration_equation),
                     config=config)
 
     app = QApplication(sys.argv)

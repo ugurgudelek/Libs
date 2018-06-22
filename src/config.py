@@ -27,6 +27,7 @@ class Config:
         self.peak_interval = float(c['Params']['peak_interval'])
         self.match_interval = float(c['Params']['match_interval'])
         self.outlier_interval = float(c['Params']['outlier_interval'])
+        self.validate_samples = False if c['Params']['validate_samples'] == 'False' else True
         self.spectrometer_interval = [float(interval) for interval in c['Params']['spectrometer_interval'].split(',')]
         self.mode = c['Params']['mode']
         self.fake = False if c['Params']['fake'] == 'False' else True

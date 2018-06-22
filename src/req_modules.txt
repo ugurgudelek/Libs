@@ -1,0 +1,9 @@
+PyQt5 - conda install -c anaconda pyqt
+seabreeze - conda install -c poehlmann python-seabreeze
+matplotlib - pip install matplotlib
+pandas - pip install pandas
+scipy - pip install scipy
+seaborn - pip install seaborn
+bokeh - pip install bokeh
+xlrd - pip install xlrd
+pyusb- pip install pyusb

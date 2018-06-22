@@ -51,6 +51,7 @@ class Analyzer:
         self.peak_interval = config.peak_interval
         self.match_interval = config.match_interval
         self.outlier_interval = config.outlier_interval
+        self.validate = config.validate_samples
 
         self.database = database
 
@@ -68,7 +69,8 @@ class Analyzer:
 
         """
         samples = self.read_samples(dir)
-        samples = self.validate_samples(samples)
+        if self.validate:
+            samples = self.validate_samples(samples)
         self.sample = self.mean(samples)
         self.matches = self.match_peaks(threshold=self.match_interval).reset_index(drop=True)
 
