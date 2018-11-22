@@ -16,10 +16,12 @@ from calibration import Calibrator
 
 from PyQt5.QtWidgets import QTableWidgetItem
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+# from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from collections import defaultdict
+from matplotlib.figure import Figure
 
 
 class Engine:
@@ -287,10 +289,10 @@ class Engine:
             dataframe['x'] = ['N', 'OM', 'P2O5', 'K2O']
             dataframe['y'] = [10, 20, 30, 40]
 
-        plt.figure()
-        ax = sns.barplot(x='x', y='y', data=dataframe)
-        canvas = FigureCanvas(ax.figure)
-
+        canvas = FigureCanvas(Figure())
+        _static_ax = canvas.figure.subplots()
+        _static_ax.bar(list(range(len(dataframe))), dataframe['y'].values, tick_label=dataframe['x'].values)
+        # _static_ax = sns.barplot(x='x', y='y', data=dataframe)
         return canvas
 
 
@@ -303,4 +305,6 @@ if __name__ == '__main__':
                                           calibration_eqns=config.calibration_equation),
                     config=config)
 
-    engine.pipeline('adana')
+    # engine.pipeline('adana')
+
+    engine.analyze("../output/samples/adana/1", plotnow=True)
