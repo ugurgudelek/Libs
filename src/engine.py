@@ -133,7 +133,7 @@ class Engine:
                                                       if os.path.isfile(os.path.join(cur_fake_sample_dir, file))]))
             reading = pd.read_csv(random_path)
 
-            time.sleep(0.1)
+            time.sleep(2)
             print('Fdata imported. {}'.format(random_path.split('\\')[-1]))
         else:
             reading = self.iomanager.io_to_dataframe()
