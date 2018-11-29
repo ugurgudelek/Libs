@@ -202,7 +202,7 @@ class Engine:
             self.analyzer.plot_matches(ax)
 
             ax.legend()
-            plt.show()
+            plt.show(block=False)
 
         return (sample, matches)
 
