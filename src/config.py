@@ -31,6 +31,7 @@ class Config:
         self.spectrometer_interval = [float(interval) for interval in c['Params']['spectrometer_interval'].split(',')]
         self.mode = c['Params']['mode']
         self.fake = False if c['Params']['fake'] == 'False' else True
+        self.fake_samples = list(map(lambda x: x.strip(), c['Params']['fake_samples'].split(',')))
         self.calibration_epsion = float(c['Params']['calibration_epsilon'])
 
 

@@ -53,6 +53,7 @@ class Engine:
         self.calibration_output_dir = config.calibration_output_dir
 
         self.fake = config.fake
+        self.fake_samples = config.fake_samples
         self.calibration_epsilon = config.calibration_epsion
 
         self.loc_name = None
@@ -125,10 +126,15 @@ class Engine:
 
         name = time.time()
         if self.fake:
-            fakenum = random.randint(1, 10)
-            reading = pd.read_csv(os.path.join(self.fake_sample_dir, 'fakesample_{}.csv'.format(fakenum)))
+
+            cur_fake_sample_dir = os.path.join(self.fake_sample_dir, self.numune_info['numuneadi']) if self.numune_info['numuneadi'] in self.fake_samples else self.fake_sample_dir
+            random_path = os.path.join(cur_fake_sample_dir,
+                                       random.choice([file for file in os.listdir(cur_fake_sample_dir)
+                                                      if os.path.isfile(os.path.join(cur_fake_sample_dir, file))]))
+            reading = pd.read_csv(random_path)
+
             time.sleep(0.1)
-            print('Fake data imported. fakesample_{}.csv'.format(fakenum))
+            print('Fdata imported. {}'.format(random_path.split('\\')[-1]))
         else:
             reading = self.iomanager.io_to_dataframe()
 
