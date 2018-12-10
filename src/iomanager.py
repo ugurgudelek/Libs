@@ -7,11 +7,12 @@ import seabreeze
 seabreeze.backends.use('pyseabreeze')
 import seabreeze.spectrometers as sb
 
+
+
 import matplotlib.pyplot as plt
 import time
 import numpy as np
 import pandas as pd
-import os
 from multiprocessing.dummy import Pool as ThreadPool
 
 import warnings

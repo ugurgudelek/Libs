@@ -5,7 +5,6 @@ import time
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import random
 
 from config import Config
@@ -16,9 +15,11 @@ from calibration import Calibrator
 
 from PyQt5.QtWidgets import QTableWidgetItem
 
-# from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+# from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
+
 
 from collections import defaultdict
 from matplotlib.figure import Figure
