@@ -59,7 +59,7 @@ class Analyzer:
         self.matches = None
 
 
-    def process_samples(self, dir):
+    def process_samples(self, dir, find_matches=True):
         """
 
         Args:
@@ -72,7 +72,10 @@ class Analyzer:
         if self.validate:
             samples = self.validate_samples(samples)
         self.sample = self.mean(samples)
-        self.matches = self.match_peaks(threshold=self.match_interval).reset_index(drop=True)
+
+        self.matches = None
+        if find_matches:
+            self.matches = self.match_peaks(threshold=self.match_interval).reset_index(drop=True)
 
         return self.sample, self.matches
 

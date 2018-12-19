@@ -40,6 +40,8 @@ class OceanViewGui(QMainWindow):
         self.init_analiz_window()
         self.init_tbs_window()
 
+
+
     @property
     def remainingrecord(self):
         return self._remainingrecord
@@ -91,18 +93,18 @@ class OceanViewGui(QMainWindow):
 
             dir = engine.save_readings()
 
-            if self.dev_mode:
-                # Plot readings
-                subplot(dictionary=readings, xname='wavelengths', yname='intensities', ncols=3)
-
-                # Analyze readings
-                choice = QMessageBox.question(self, 'Analyze',
-                                              'Do you want to analyze {}-{}'.format(loc_name, sample_id),
-                                              QMessageBox.Yes | QMessageBox.No)
-
-                if choice == QMessageBox.Yes:
-                    # fixme: make it generic
-                    engine.pipeline(loc_name='niğde')
+            # if self.dev_mode:
+            #     # Plot readings
+            #     subplot(dictionary=readings, xname='wavelengths', yname='intensities', ncols=3)
+            #
+            #     # Analyze readings
+            #     choice = QMessageBox.question(self, 'Analyze',
+            #                                   'Do you want to analyze {}-{}'.format(loc_name, sample_id),
+            #                                   QMessageBox.Yes | QMessageBox.No)
+            #
+            #     if choice == QMessageBox.Yes:
+            #         # fixme: make it generic
+            #         engine.pipeline(loc_name='niğde')
 
         # reset for next record
         self.remainingrecord = self.howmanyrecordSpinBox.value()
@@ -257,6 +259,8 @@ class OceanViewGui(QMainWindow):
         self.analiz_window.progressLabel.setText('Veriler kaydediliyor...')
         dir = self.engine.save_readings()
 
+
+
         # show saved popup
         self.show_save_popup('Atışlar kaydedildi.\nAnalize devam edilecek.')
 
@@ -265,37 +269,41 @@ class OceanViewGui(QMainWindow):
         # analyze and show peaks and its neighbours
         (sample, matches) = self.engine.analyze(dir=dir, plotnow=True)
 
-        self.analiz_window.progressLabel.setText('Kalibrasyon verisi işleniyor...')
-        # match elements in calibration excel with peak values.
-        found_el_intensity_matches = self.engine.calibrate(matches=matches)
 
-        # done: read calibration file
 
-        # done: implement fit calibration
 
-        # numuneadi = self.engine.numune_info['numuneadi']
-        # element = 'N 5 @ 443.506'
-        # X = self.engine.fit(found_el_intensity_matches[element])
-        # miktar = '{:.2f}'.format(X)
-        # birim = self.engine.numune_info['birim']
-        # durumu = self.engine.limit_values('N', X)
+        if matches is not None:
+            self.analiz_window.progressLabel.setText('Kalibrasyon verisi işleniyor...')
+            # match elements in calibration excel with peak values.
+            found_el_intensity_matches = self.engine.calibrate(matches=matches)
 
-        (names, quantities, statuses, units) = self.engine.analysis_to_ppm_data(found_el_intensity_matches)
+            # done: read calibration file
 
-        self.analiz_window.progressLabel.setText('Bilgiler işleniyor...')
-        # done: fill table
-        numuneadi = self.engine.numune_info['numuneadi']
-        for name,quantity,status, unit in zip(names, quantities, statuses, units):
-            self.engine.data_to_row(self.analiz_window.tableWidget, numuneadi, name, quantity, unit, status)
+            # done: implement fit calibration
 
-        # todo: show results
-        df = pd.DataFrame()
-        df['x'] = ['N', 'OM', 'P2O5', 'K2O']
-        df['y'] = [10, 20, 30, 40]
-        widget = self.engine.result_image(df)
-        widget.setFixedSize(200, 200)
-        self.analiz_window.resultLayout.itemAt(0).widget().setParent(None)
-        self.analiz_window.resultLayout.addWidget(widget)
+            # numuneadi = self.engine.numune_info['numuneadi']
+            # element = 'N 5 @ 443.506'
+            # X = self.engine.fit(found_el_intensity_matches[element])
+            # miktar = '{:.2f}'.format(X)
+            # birim = self.engine.numune_info['birim']
+            # durumu = self.engine.limit_values('N', X)
+
+            (names, quantities, statuses, units) = self.engine.analysis_to_ppm_data(found_el_intensity_matches)
+
+            self.analiz_window.progressLabel.setText('Bilgiler işleniyor...')
+            # done: fill table
+            numuneadi = self.engine.numune_info['numuneadi']
+            for name,quantity,status, unit in zip(names, quantities, statuses, units):
+                self.engine.data_to_row(self.analiz_window.tableWidget, numuneadi, name, quantity, unit, status)
+
+            # todo: show results
+            df = pd.DataFrame()
+            df['x'] = ['N', 'OM', 'P2O5', 'K2O']
+            df['y'] = [10, 20, 30, 40]
+            widget = self.engine.result_image(df)
+            widget.setFixedSize(200, 200)
+            self.analiz_window.resultLayout.itemAt(0).widget().setParent(None)
+            self.analiz_window.resultLayout.addWidget(widget)
 
         # reset remainingrecord
         self.remainingrecord = self.analiz_window.howmanyrecordSpinBox.value()

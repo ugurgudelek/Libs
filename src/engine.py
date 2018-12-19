@@ -62,6 +62,7 @@ class Engine:
         self.readings = None
 
         self.dev_mode = True if config.mode == 'dev' else False
+        self.angle_calibraton_mode = True if config.mode == 'angle_calibration' else False
 
         self.giris_info = None
 
@@ -134,7 +135,7 @@ class Engine:
                                                       if os.path.isfile(os.path.join(cur_fake_sample_dir, file))]))
             reading = pd.read_csv(random_path)
 
-            time.sleep(2)
+            time.sleep(self.config.fake_read_time)
             print('Fdata imported. {}'.format(random_path.split('\\')[-1]))
         else:
             reading = self.iomanager.io_to_dataframe()
@@ -193,14 +194,18 @@ class Engine:
 
     def analyze(self, dir, plotnow=False):
         # find matches
-        (sample, matches) = self.analyzer.process_samples(dir)
+        if self.angle_calibraton_mode:  # just draw data for now.
+            (sample, matches) = self.analyzer.process_samples(dir, find_matches=False)
+        else:
+            (sample, matches) = self.analyzer.process_samples(dir)
 
         if plotnow:
             # Plot
             fig, ax = plt.subplots()
 
             self.analyzer.plot_data(ax, point_peaks=True, draw_verticals=False)
-            self.analyzer.plot_matches(ax)
+            if matches is not None:
+                self.analyzer.plot_matches(ax)
 
             ax.legend()
             plt.show(block=False)

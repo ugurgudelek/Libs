@@ -32,6 +32,7 @@ class Config:
         self.mode = c['Params']['mode']
         self.fake = False if c['Params']['fake'] == 'False' else True
         self.fake_samples = list(map(lambda x: x.strip(), c['Params']['fake_samples'].split(',')))
+        self.fake_read_time = float(c['Params']['fake_read_time'])
         self.calibration_epsion = float(c['Params']['calibration_epsilon'])
 
 
