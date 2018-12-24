@@ -18,6 +18,10 @@ from util import subplot
 from calibration import Calibrator
 
 import pandas as pd
+import time
+import matplotlib.pyplot as plt
+
+from sample import Sample
 
 
 class OceanViewGui(QMainWindow):
@@ -27,18 +31,47 @@ class OceanViewGui(QMainWindow):
         self.engine = engine
         self.config = config
 
-        self.giris_window = QWidget()
-        self.analiz_window = QWidget()
-        self.tbs_window = QWidget()
 
-        self.w = 1000
-        self.h = 640
+        if config.mode == "angle_calibration":
+            # TODO: pls reconstruct these methods!!
+            numune_info = dict(numuneadi='angle_calibration_default',
+                               lazeratissayisi=1)
+            self.engine.set_numune_info(numune_info)
 
-        self.init_ui()
+            while True:
+                _, sample = self.engine.read_io()
 
-        self.init_giris_window()
-        self.init_analiz_window()
-        self.init_tbs_window()
+                sample = Sample(name="angle_calibration_default",
+                       dataframe=sample,
+                       peak_interval=self.engine.analyzer.peak_interval,
+                       is_valid=False)
+
+                self.engine.analyzer.sample = sample
+
+                fig, ax = plt.subplots()
+
+                self.engine.analyzer.plot_data(ax, point_peaks=True, draw_verticals=False)
+
+
+                ax.legend()
+                plt.show()
+
+
+
+        else:
+
+            self.giris_window = QWidget()
+            self.analiz_window = QWidget()
+            self.tbs_window = QWidget()
+
+            self.w = 1000
+            self.h = 640
+
+            self.init_ui()
+
+            self.init_giris_window()
+            self.init_analiz_window()
+            self.init_tbs_window()
 
 
 
