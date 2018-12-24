@@ -6,13 +6,15 @@ class Sample:
 
     """
 
-    def __init__(self, name, dataframe, peak_interval, is_valid):
+    def __init__(self, name, dataframe, peak_interval, is_valid, find_peaks=True):
         self.name = name
         self.sample = dataframe
         self.is_valid = is_valid
         self.peak_interval = peak_interval
 
-        self.peaks = self._find_peaks()
+        self.peaks = None
+        if find_peaks:
+            self.peaks = self._find_peaks()
 
 
 

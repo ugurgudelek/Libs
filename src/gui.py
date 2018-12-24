@@ -44,13 +44,14 @@ class OceanViewGui(QMainWindow):
                 sample = Sample(name="angle_calibration_default",
                        dataframe=sample,
                        peak_interval=self.engine.analyzer.peak_interval,
-                       is_valid=False)
+                       is_valid=False,
+                        find_peaks=False)
 
                 self.engine.analyzer.sample = sample
 
                 fig, ax = plt.subplots()
 
-                self.engine.analyzer.plot_data(ax, point_peaks=True, draw_verticals=False)
+                self.engine.analyzer.plot_data(ax, point_peaks=False, draw_verticals=False)
 
 
                 ax.legend()
