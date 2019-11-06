@@ -18,9 +18,11 @@ from multiprocessing.dummy import Pool as ThreadPool
 import warnings
 
 class IOManager:
-    def __init__(self):
+    def __init__(self, trigger_mode=4):
 
+        self.trigger_mode = trigger_mode
         devices = sb.list_devices()
+
 
         # Assert device count
         if len(devices) != 2:
@@ -58,7 +60,7 @@ class IOManager:
             #        'EXT_HW_SYNC'  : 3,
             #        'EXT_HW_EDGE'  : 4,
             #         }
-            spectrometer.trigger_mode(mode=4)  # 'EXT_HW_EDGE'
+            spectrometer.trigger_mode(mode=self.trigger_mode)  # 'EXT_HW_EDGE'
 
         self.intensities = None  # to store lastly fetched intensities
         self.wavelengths = None
@@ -91,12 +93,12 @@ class IOManager:
 # ========================  IOMANAGER  ========================
 
 if __name__ == "__main__":
-    with IOManager() as iomanager:
+    with IOManager(trigger_mode=0) as iomanager:
         print(iomanager.spectrometers)
         df = iomanager.io_to_dataframe()
         print("Done!")
 
-        df.plot(x='wavelengths',y='intensities')
+        df.plot(x='wavelengths', y='intensities')
         plt.show()
 
 

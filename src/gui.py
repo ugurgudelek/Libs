@@ -395,7 +395,7 @@ class OceanViewGui(QMainWindow):
 
 if __name__ == '__main__':
     config = Config('../config.ini')
-    engine = Engine(iomanager=IOManager(),
+    engine = Engine(iomanager=IOManager(trigger_mode=4),
                     analyzer=Analyzer(config=config, database=Database(config)),
                     calibrator=Calibrator(input_dir=config.calibration_input_dir,
                                           output_dir=config.calibration_output_dir,
